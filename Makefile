@@ -6,23 +6,37 @@
 
 PROJ = pako32
 
-PIN_DEF = tinyfpga-bx/pins.pcf
+PIN_DEF = pins.pcf
 DEVICE = lp8k
 PACKAGE = cm81
+
+HDL_FILES = \
+	cpu.v \
+	fifo_if.v \
+	pako32.v \
+	prescaler.v \
+	usb_cdc/usb_cdc/bulk_endp.v \
+	usb_cdc/usb_cdc/ctrl_endp.v \
+	usb_cdc/usb_cdc/in_fifo.v \
+	usb_cdc/usb_cdc/out_fifo.v \
+	usb_cdc/usb_cdc/phy_rx.v \
+	usb_cdc/usb_cdc/phy_tx.v \
+	usb_cdc/usb_cdc/sie.v \
+	usb_cdc/usb_cdc/usb_cdc.v
 
 .PHONY: all
 all: $(PROJ).rpt $(PROJ).bin
 
-%.json: %.v
-	yosys -p 'synth_ice40 -top top -json $@' $<
+$(PROJ).json: $(HDL_FILES)
+	yosys -p '$(foreach file,$^,read_verilog $(file);)' -p 'synth_ice40 -top $(PROJ) -json $@'
 
-%.asc: $(PIN_DEF) %.json
-	nextpnr-ice40 --$(DEVICE) --package $(PACKAGE) --asc $@ --pcf $< --json $*.json
+$(PROJ).asc: $(PIN_DEF) $(PROJ).json
+	nextpnr-ice40 --$(DEVICE) --package $(PACKAGE) --asc $@ --pcf $(PIN_DEF) --json $(PROJ).json
 
-%.bin: %.asc
+$(PROJ).bin: $(PROJ).asc
 	icepack $< $@
 
-%.rpt: %.asc
+$(PROJ).rpt: $(PROJ).asc
 	icetime -d $(DEVICE) -mtr $@ $<
 
 # TODO Review.
@@ -52,5 +66,3 @@ prog: $(PROJ).bin
 .PHONY: clean
 clean:
 	rm -f abc.history $(PROJ).json $(PROJ).asc $(PROJ).rpt $(PROJ).bin
-
-.SECONDARY:
