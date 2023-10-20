@@ -27,7 +27,7 @@ Steps for [openSUSE Tumbleweed][openSUSE Tumbleweed] (tested with 20230922):
 
 ```
 $ sudo zypper install git gcc gcc-c++ make cmake bison flex \
-    python3-devel python3-virtualenv libffi-devel libftdi1-devel \
+    python3-devel python3-virtualenv eigen3-devel libffi-devel libftdi1-devel \
     libstdc++-devel libboost_filesystem-devel libboost_program_options-devel \
     libboost_iostreams-devel libboost_system-devel libboost_thread-devel \
     tcl-devel readline-devel
