@@ -31,9 +31,8 @@ $ sudo zypper install git gcc gcc-c++ make cmake bison flex \
     libstdc++-devel libboost_filesystem-devel libboost_program_options-devel \
     libboost_iostreams-devel libboost_system-devel libboost_thread-devel \
     tcl-devel readline-devel
-
-$ mkdir icestorm-build
-$ cd icestorm-build
+$ mkdir ~/icestorm-build
+$ cd ~/icestorm-build
 
 $ git clone https://github.com/YosysHQ/icestorm.git
 $ cd icestorm
@@ -68,7 +67,34 @@ $ ln -s ../opt/icestorm/bin/icepack
 $ ln -s ../opt/icestorm/bin/icetime
 $ ln -s ../opt/nextpnr/bin/nextpnr-ice40
 $ ln -s ../opt/yosys/bin/yosys
+$ ln -s ../opt/yosys/bin/yosys-config
 $ ln -s ../opt/tinyprog/bin/tinyprog
+```
+
+Testbench dependencies:
+
+```
+$ sudo zypper install autoconf gperf
+$ cd ~/icestorm-build
+
+$ git clone https://github.com/steveicarus/iverilog.git
+$ cd iverilog
+$ git checkout -b pako32 v12_0
+$ sh autoconf.sh
+$ ./configure --prefix=$HOME/opt/iverilog
+$ make -j$(nproc)
+$ make install
+$ cd ..
+
+$ virtualenv ~/opt/cocotb
+$ source ~/opt/cocotb/bin/activate
+$ pip install cocotb==1.8.1
+$ deactivate
+
+$ cd ~/bin
+$ ln -s ../opt/iverilog/bin/iverilog
+$ ln -s ../opt/iverilog/bin/vvp
+$ ln -s ../opt/cocotb/bin/cocotb-config
 ```
 
 ## License
