@@ -30,7 +30,7 @@ export HDL_FILES
 all: $(PROJ).rpt $(PROJ).bin
 
 $(PROJ).json: $(HDL_FILES)
-	yosys -p '$(foreach file,$^,read_verilog $(file);)' -p 'synth_ice40 -top $(PROJ) -json $@'
+	yosys -p '$(foreach file,$^,read_verilog -sv $(file);)' -p 'synth_ice40 -top $(PROJ) -json $@'
 
 $(PROJ).asc: $(PIN_DEF) $(PROJ).json
 	nextpnr-ice40 --$(DEVICE) --package $(PACKAGE) --asc $@ --pcf $(PIN_DEF) --json $(PROJ).json
