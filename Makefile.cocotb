@@ -1,0 +1,14 @@
+# Make sure cocotb libraries installed in a venv can be found.
+PYTHONPATH = $(shell cocotb-config --prefix)
+export PYTHONPATH
+
+# Configuration for cocotb.
+SIM ?= icarus
+TOPLEVEL_LANG = verilog
+VERILOG_SOURCES += \
+	$(HDL_FILES) \
+	$(shell yosys-config --datdir)/ice40/cells_sim.v
+TOPLEVEL = $(PROJ)
+MODULE = tests.test_my_design
+
+include $(shell cocotb-config --makefiles)/Makefile.sim

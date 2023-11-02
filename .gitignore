@@ -1,6 +1,9 @@
+*.pyc
 *.swp
 /abc.history
 /pako32.asc
 /pako32.bin
 /pako32.json
 /pako32.rpt
+/results.xml
+/sim_build

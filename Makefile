@@ -5,6 +5,7 @@
 # https://github.com/YosysHQ/icestorm/blob/master/examples/icestick/Makefile.
 
 PROJ = pako32
+export PROJ
 
 PIN_DEF = pins.pcf
 DEVICE = lp8k
@@ -23,6 +24,7 @@ HDL_FILES = \
 	usb_cdc/usb_cdc/phy_tx.v \
 	usb_cdc/usb_cdc/sie.v \
 	usb_cdc/usb_cdc/usb_cdc.v
+export HDL_FILES
 
 .PHONY: all
 all: $(PROJ).rpt $(PROJ).bin
@@ -63,6 +65,11 @@ $(PROJ).rpt: $(PROJ).asc
 prog: $(PROJ).bin
 	tinyprog -p $<
 
+.PHONY: check
+check:
+	$(MAKE) -f Makefile.cocotb all
+
 .PHONY: clean
 clean:
+	$(MAKE) -f Makefile.cocotb clean
 	rm -f abc.history $(PROJ).json $(PROJ).asc $(PROJ).rpt $(PROJ).bin
