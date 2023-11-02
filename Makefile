@@ -41,26 +41,6 @@ $(PROJ).bin: $(PROJ).asc
 $(PROJ).rpt: $(PROJ).asc
 	icetime -d $(DEVICE) -mtr $@ $<
 
-# TODO Review.
-#%_tb: %_tb.v %.v
-#	iverilog -o $@ $^
-#
-#%_tb.vcd: %_tb
-#	vvp -N $< +vcd=$@
-#
-#%_syn.v: %.json
-#	yosys -p 'read_json $^; write_verilog $@'
-#
-#%_syntb: %_tb.v %_syn.v
-#	iverilog -o $@ $^ `yosys-config --datdir/ice40/cells_sim.v`
-#
-#%_syntb.vcd: %_syntb
-#	vvp -N $< +vcd=$@
-#
-#sim: $(PROJ)_tb.vcd
-#
-#postsim: $(PROJ)_syntb.vcd
-
 .PHONY: prog
 prog: $(PROJ).bin
 	tinyprog -p $<
