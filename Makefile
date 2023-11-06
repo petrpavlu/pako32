@@ -15,6 +15,7 @@ HDL_FILES = \
 	fifo_if.v \
 	pako32.v \
 	prescaler.v \
+	registers.v \
 	usb_cdc/usb_cdc/bulk_endp.v \
 	usb_cdc/usb_cdc/ctrl_endp.v \
 	usb_cdc/usb_cdc/in_fifo.v \
