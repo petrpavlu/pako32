@@ -5,7 +5,6 @@
 # https://github.com/YosysHQ/icestorm/blob/master/examples/icestick/Makefile.
 
 PROJ = pako32
-export PROJ
 
 PIN_DEF = pins.pcf
 DEVICE = lp8k
@@ -47,9 +46,9 @@ prog: $(PROJ).bin
 
 .PHONY: check
 check:
-	$(MAKE) -f Makefile.cocotb all
+	$(MAKE) -C tests all
 
 .PHONY: clean
 clean:
-	$(MAKE) -f Makefile.cocotb clean
+	$(MAKE) -C tests clean
 	rm -f abc.history $(PROJ).json $(PROJ).asc $(PROJ).rpt $(PROJ).bin
