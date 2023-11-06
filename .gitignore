@@ -1,6 +1,7 @@
 *.pyc
 *.swp
 /abc.history
+/examples/calc/calc
 /pako32.asc
 /pako32.bin
 /pako32.json
