@@ -102,7 +102,7 @@ module pako32
 
    assign led = ~dp_pu | ~up_cnt[20];
 
-   app u_app (.clk_i(clk_2mhz),
+   cpu u_cpu (.clk_i(clk_2mhz),
               .rstn_i(rstn),
               .sleep_o(sleep),
               .out_data_i(out_data),

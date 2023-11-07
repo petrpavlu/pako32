@@ -1,11 +1,10 @@
+// Copyright (C) 2023 Petr Pavlu <petr.pavlu@dagobah.cz>
+// SPDX-License-Identifier: MIT
+
 // TODO Replace, this temporary example is taken from
 // https://github.com/ulixxe/usb_cdc/blob/main/examples/TinyFPGA-BX/hdl/soc/app.v.
 
-// APP module shall implement an example of application module for USB_CDC.
-// APP shall:
-//   - TBD
-
-module app
+module cpu
   (
    input        clk_i,
    input        rstn_i,
