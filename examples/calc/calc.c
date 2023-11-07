@@ -75,6 +75,7 @@ void process_one(void)
 }
 
 /* Main loop. */
+__attribute__((section(".text._start")))
 void _start(void)
 {
 	while (1)

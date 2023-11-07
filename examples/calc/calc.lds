@@ -7,6 +7,7 @@ SECTIONS
 {
 	. = 0x10000;
 	.text : {
+		*(.text._start)
 		*(.text)
 	}
 	. = 0x20000;
