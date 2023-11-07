@@ -3,13 +3,7 @@
 
 // APP module shall implement an example of application module for USB_CDC.
 // APP shall:
-//   - Loopback data from out_data_i to in_data_o, and at the same time:
-//       - Change case if data is an alphabetic character
-//       - Increase by 1 if data is a digit from 0 to 8
-//       - Change 9 character to 0
-//       - Transmit unchanged character for all other characters
-//   - Send sleep signal to the TOP module to switch LED on when a
-//       character is transmitted
+//   - TBD
 
 module app
   (
@@ -50,16 +44,8 @@ module app
    end
 
    localparam [3:0] ST_RESET = 'd0,
-                    ST_OUT_CKECK0 = 'd1,
-                    ST_OUT_CKECK1 = 'd2,
                     ST_OUT_SLEEP = 'd3,
-                    ST_OUT0 = 'd4,
-                    ST_OUT1 = 'd5,
-                    ST_EXE = 'd6,
-                    ST_IN_CKECK0 = 'd7,
-                    ST_IN_CKECK1 = 'd8,
-                    ST_IN_SLEEP = 'd9,
-                    ST_IN = 'd10;
+                    ST_IN_SLEEP = 'd9;
 
    reg [3:0]        status_q, status_d;
    reg              fifo_irq_q, fifo_irq_d;
@@ -79,93 +65,33 @@ module app
       end
    end
 
-   reg [7:0] cpu_wrdata;
-   reg [1:0] cpu_addr;
-   reg       cpu_rd, cpu_wr;
-   reg       fifo_sel;
 
-   wire [7:0] fifo_rddata;
-   wire       fifo_out_irq, fifo_in_irq;
+   logic       fifo_sel;
+   logic       cpu_rd, cpu_wr;
+   logic [1:0] cpu_addr;
+   logic [7:0] cpu_wrdata;
 
-   always @(/*AS*/data_q or fifo_in_irq or fifo_irq_q or fifo_out_irq
-            or fifo_rddata or status_q) begin
-      status_d = status_q;
-      fifo_irq_d = fifo_irq_q | fifo_out_irq | fifo_in_irq;
-      data_d = data_q;
-      cpu_addr = 2'b00;
+   logic [7:0] fifo_rddata;
+   logic       fifo_out_irq, fifo_in_irq;
+
+   always_comb begin
+      // dummy values, always zero
+      fifo_sel = 1'b0;
       cpu_rd = 1'b0;
       cpu_wr = 1'b0;
+      cpu_addr = 2'b00;
       cpu_wrdata = 8'd0;
-      fifo_sel = 1'b0;
-      case (status_q)
-        ST_RESET : begin
-           status_d = ST_OUT_CKECK0;
-        end
-        ST_OUT_CKECK0 : begin
-           fifo_irq_d = 1'b0;
-           cpu_addr = 2'b10;
-           cpu_rd = 1'b1;
-           fifo_sel = 1'b1;
-           status_d = ST_OUT_CKECK1;
-        end
-        ST_OUT_CKECK1 : begin
-           if (fifo_rddata[0] == 1'b1)
-             status_d = ST_OUT0;
-           else
-             status_d = ST_OUT_SLEEP;
-        end
-        ST_OUT_SLEEP : begin
-           if (fifo_irq_q)
-             status_d = ST_OUT_CKECK0;
-        end
-        ST_OUT0 : begin
-           cpu_addr = 2'b11;
-           cpu_rd = 1'b1;
-           fifo_sel = 1'b1;
-           status_d = ST_OUT1;
-        end
-        ST_OUT1 : begin
-           data_d = fifo_rddata[7:0];
-           status_d = ST_EXE;
-        end
-        ST_EXE : begin
-           if ((data_q >= "a" && data_q <= "z") ||
-               (data_q >= "A" && data_q <= "Z"))
-             data_d = data_q ^ 8'h20;
-           else if (data_q >= "0" && data_q <= "8")
-             data_d = data_q + 1;
-           else if (data_q == "9")
-             data_d = "0";
-           status_d = ST_IN_CKECK0;
-        end
-        ST_IN_CKECK0 : begin
-           fifo_irq_d = 1'b0;
-           cpu_addr = 2'b01;
-           cpu_rd = 1'b1;
-           fifo_sel = 1'b1;
-           status_d = ST_IN_CKECK1;
-        end
-        ST_IN_CKECK1 : begin
-           if (fifo_rddata[0] == 1'b1)
-             status_d = ST_IN;
-           else
-             status_d = ST_IN_SLEEP;
-        end
-        ST_IN_SLEEP : begin
-           if (fifo_irq_q)
-             status_d = ST_IN_CKECK0;
-        end
-        ST_IN : begin
-           cpu_addr = 2'b01;
-           cpu_wr = 1'b1;
-           fifo_sel = 1'b1;
-           cpu_wrdata = data_q;
-           status_d = ST_OUT_CKECK0;
-        end
-        default : begin
-           status_d = ST_OUT_CKECK0;
-        end
-      endcase
+      // unused: fifo_rddata = 8'd0;
+      // unused: fifo_in_irq
+      // unised: fifo_out_irq
+
+      // app API
+      // in_data_o = 0;
+      // in_valid_o = 0;
+      //  in_ready_i = 0;
+      //  out_data_i = 0;
+      //  out_valid_i = 0;
+      // out_ready_o = 0;
    end
 
    fifo_if u_fifo_if (.clk_i(clk_i),
