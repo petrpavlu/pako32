@@ -11,13 +11,13 @@ all: calc.text.txt calc.data.txt
 calc: calc.c calc.lds
 
 calc.text.raw: calc
-	objcopy --dump-section .text=$@ $<
+	objcopy --dump-section .text=$@ $< /dev/null
 
 calc.text.txt: calc.text.raw
 	od --address-radix=none --format=x1 --output-duplicates --width=1 $< | tr --delete ' ' > $@
 
 calc.data.raw: calc
-	objcopy --dump-section .data=$@ $<
+	objcopy --dump-section .data=$@ $< /dev/null
 
 calc.data.txt: calc.data.raw
 	od --address-radix=none --format=x1 --output-duplicates --width=1 $< | tr --delete ' ' > $@
