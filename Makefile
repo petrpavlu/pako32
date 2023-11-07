@@ -11,6 +11,8 @@ DEVICE = lp8k
 PACKAGE = cm81
 
 HDL_FILES = \
+	alu.v \
+	const.v \
 	cpu.v \
 	fifo_if.v \
 	pako32.v \
