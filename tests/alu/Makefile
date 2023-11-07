@@ -3,7 +3,6 @@
 
 # Configuration for cocotb.
 VERILOG_SOURCES = ../../alu.v
-VERILOG_INCLUDE_DIRS = ../..
 TOPLEVEL = alu
 MODULE = test_alu
 

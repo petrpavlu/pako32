@@ -9,5 +9,6 @@ export PYTHONPATH
 # Configuration for cocotb.
 SIM ?= icarus
 TOPLEVEL_LANG = verilog
+VERILOG_INCLUDE_DIRS = ../..
 
 include $(shell cocotb-config --makefiles)/Makefile.sim
