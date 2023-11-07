@@ -6,13 +6,22 @@ CFLAGS = --target=riscv32-unknown-elf -march=rv32i -nostdlib -Wall -pedantic
 LDFLAGS = -T calc.lds
 
 .PHONY: all
-all: calc.raw
+all: calc.text.txt calc.data.txt
 
-calc: calc.c
+calc: calc.c calc.lds
 
-calc.raw: calc
-	objcopy --dump-section .prog=$@ $<
+calc.text.raw: calc
+	objcopy --dump-section .text=$@ $<
+
+calc.text.txt: calc.text.raw
+	od --address-radix=none --format=x1 --output-duplicates --width=1 $< | tr -d ' ' > $@
+
+calc.data.raw: calc
+	objcopy --dump-section .data=$@ $<
+
+calc.data.txt: calc.data.raw
+	od --address-radix=none --format=x1 --output-duplicates --width=1 $< | tr -d ' ' > $@
 
 .PHONY: clean
 clean:
-	rm -f calc.raw calc
+	rm -f calc calc.text.raw calc.text.txt calc.data.raw calc.data.txt

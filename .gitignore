@@ -2,6 +2,8 @@
 *.swp
 /abc.history
 /examples/calc/calc
+/examples/calc/calc.*.raw
+/examples/calc/calc.*.txt
 /pako32.asc
 /pako32.bin
 /pako32.json

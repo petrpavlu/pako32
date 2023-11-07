@@ -64,6 +64,8 @@ void process_one(void)
 	char input[128];
 	int ret;
 
+	puts("> ");
+
 	ret = read_input(input, sizeof(input));
 	if (ret != 0)
 		return;
