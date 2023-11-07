@@ -111,4 +111,58 @@ module app
                       .out_valid_i(out_valid_i),
                       .out_ready_o(out_ready_o));
 
+   // CPU begins here
+   logic [31:0] pc;
+   logic [31:0] pc_data;
+   logic        wr_en;
+   logic [4:0]  rd_idx, rs1_idx, rs2_idx;
+   logic [31:0] rs1_data, rs2_data, imm_data;
+   logic [3:0]  alu_ctrl;
+   logic [31:0] rd_data_mx, alu_b_mx;
+   logic        reg_input, alu_input;
+   logic [31:0] alu_result;
+
+   mem_instr u_mem_instr (
+        .clk_i(clk_i),
+        .pc_i(pc),
+        .pc_data_o(pc_data)
+   );
+
+   registers u_registers (
+        .clk_i(clk_i),
+        .rstn_i(rstn),
+
+        .wr_en_i(wr_en),
+        .rd_idx_i(rd_idx),
+        .rd_data_i(rd_data_mx),
+
+        .rs1_idx_i(rs1_idx),
+        .rs1_data_o(rs1_data),
+
+        .rs2_idx_i(rs2_idx),
+        .rs2_data_o(rs2_data),
+   );
+
+   alu u_alu(
+        .a(rs1_data),
+        .b(alu_b_mx),
+        .control(alu_ctrl),
+        .result(alu_result)
+   );
+
+   control u_control(
+        .pc_data_i(pc_data),
+        .wr_en_o(wr_en),
+        .rd_idx_o(rd_idx),
+        .rs1_idx_o(rs1_idx),
+        //.rs2_idx_o(rs2_idx),
+        .imm_data_o(imm_data),
+        .alu_ctrl_o(alu_ctrl),
+        .alu_input_o(alu_input),
+        .reg_input_o(reg_input)
+   );
+
+   assign rd_data_mx = (reg_input == 1) ? 0 : alu_result; // XXX 0 should be memory
+   assign alu_b_mx = (alu_input == 1) ? rs2_data : imm_data;
+
 endmodule
