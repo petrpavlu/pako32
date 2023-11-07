@@ -6,7 +6,7 @@ module mem_instr
     input logic clk_i,
     // read port
     input  logic [31:0] pc_i,
-    output logic [15:0] pc_data_o
+    output logic [31:0] pc_data_o
   );
 
   parameter PROG_FILE = "examples/calc/calc.text.txt";
@@ -17,25 +17,17 @@ module mem_instr
 
   logic [WIDTH-1:0] mem [SIZE-1:0];
 
-  logic [7:0] inst_lo;
-  logic [7:0] inst_hi;
- 
   // initialization
   initial begin
     $readmemh(PROG_FILE, mem);
   end
 
-  always_comb begin
-    inst_lo = mem[pc_i];
-    inst_hi = mem[pc_i + 1];
-  end
-
   // reading
   always_ff @(posedge clk_i) begin
     if (pc_i >= SIZE_B)
-      pc_data_o <= 16'd0;
+      pc_data_o <= 32'd0;
     else begin
-      pc_data_o <= {inst_hi, inst_lo};
+      pc_data_o <= {mem[pc_i + 3], mem[pc_i + 2], mem[pc_i + 1], mem[pc_i + 0]};
     end
   end
 

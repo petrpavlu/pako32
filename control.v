@@ -7,7 +7,7 @@ module control
   (
     //input logic clk_i,
     //input logic rstn_i, // XXX for internal state
-    input logic [15:0] pc_data_i,
+    input logic [31:0] pc_data_i,
 
     output  logic        wr_en_o,
     output  logic [4:0]  rd_idx_o,
