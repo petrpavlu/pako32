@@ -6,7 +6,7 @@ module mem_instr
     input logic clk_i,
     // read port
     input  logic [31:0] pc_i,
-    output logic [15:0] pc_data_o,
+    output logic [15:0] pc_data_o
   );
 
   parameter PROG_FILE = "examples/calc/calc.text.txt";

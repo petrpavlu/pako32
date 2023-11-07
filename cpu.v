@@ -140,7 +140,7 @@ module app
         .rs1_data_o(rs1_data),
 
         .rs2_idx_i(rs2_idx),
-        .rs2_data_o(rs2_data),
+        .rs2_data_o(rs2_data)
    );
 
    alu u_alu(
