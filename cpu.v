@@ -123,7 +123,9 @@ module cpu
    logic        reg_input, alu_input;
    logic [31:0] alu_result;
 
-   mem_instr u_mem_instr (
+   mem_instr #(
+        .PROG_FILE("examples/calc/calc.text.txt")
+   ) u_mem_instr (
         .clk_i(clk_i),
         .pc_i(pc),
         .pc_data_o(pc_data)

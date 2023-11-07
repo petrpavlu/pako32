@@ -11,7 +11,7 @@ module mem_instr
     output logic [31:0] pc_data_o
   );
 
-  parameter PROG_FILE = "examples/calc/calc.text.txt";
+  parameter PROG_FILE = "";
   parameter SIZE   = 1024; // words
   parameter SIZE_B = 1024; // bytes
   // XXX BYTES_PER_WIDTH, INSTS_PER_WIDTH
@@ -22,7 +22,8 @@ module mem_instr
 
   // initialization
   initial begin
-    $readmemh(PROG_FILE, mem, 0, SIZE);
+    if (PROG_FILE != "")
+      $readmemh(PROG_FILE, mem, 0, SIZE - 1);
   end
   always_comb begin
     pc_phys = pc_i - `MEM_INSTR_ZERO;
