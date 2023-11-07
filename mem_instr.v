@@ -19,7 +19,7 @@ module mem_instr
 
   // initialization
   initial begin
-    $readmemh(PROG_FILE, mem);
+    $readmemh(PROG_FILE, mem, 0, SIZE);
   end
 
   // reading
