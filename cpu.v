@@ -4,6 +4,8 @@
 // TODO Replace, this temporary example is taken from
 // https://github.com/ulixxe/usb_cdc/blob/main/examples/TinyFPGA-BX/hdl/soc/app.v.
 
+`include "const.v"
+
 module cpu
   (
    input        clk_i,
@@ -166,7 +168,7 @@ module cpu
 
   always_ff @(posedge clk_i or negedge rstn) begin
     if (~rstn)
-       pc = 'h10000;
+       pc = `MEM_INSTR_ZERO;
     else
        pc = pc + 4;	// XXX output of AGU
   end

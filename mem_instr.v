@@ -1,6 +1,8 @@
 // Copyright (C) 2023 Michal Koutný <mkoutny@suse.com>
 // SPDX-License-Identifier: MIT
 
+`include "const.v"
+
 module mem_instr
   (
     input logic clk_i,
@@ -16,18 +18,22 @@ module mem_instr
   parameter WIDTH   = 8;    // bits
 
   logic [WIDTH-1:0] mem [SIZE-1:0];
+  logic [31:0] pc_phys;
 
   // initialization
   initial begin
     $readmemh(PROG_FILE, mem, 0, SIZE);
   end
+  always_comb begin
+    pc_phys = pc_i - `MEM_INSTR_ZERO;
+  end
 
   // reading
   always_ff @(posedge clk_i) begin
-    if (pc_i >= SIZE_B)
+    if (pc_phys < 0 ||  pc_phys >= SIZE_B)
       pc_data_o <= 32'd0;
     else begin
-      pc_data_o <= {mem[pc_i + 3], mem[pc_i + 2], mem[pc_i + 1], mem[pc_i + 0]};
+      pc_data_o <= {mem[pc_phys + 3], mem[pc_phys + 2], mem[pc_phys + 1], mem[pc_phys + 0]};
     end
   end
 

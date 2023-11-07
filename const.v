@@ -15,3 +15,5 @@
 `define ALU_OP_GE 11
 `define ALU_OP_LTU 12
 `define ALU_OP_GEU 13
+
+`define MEM_INSTR_ZERO 'h10000
