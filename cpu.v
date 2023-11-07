@@ -164,4 +164,10 @@ module cpu
    assign rd_data_mx = (reg_input == 1) ? 0 : alu_result; // XXX 0 should be memory
    assign alu_b_mx = (alu_input == 1) ? rs2_data : imm_data;
 
+  always_ff @(posedge clk_i or negedge rstn) begin
+    if (~rstn)
+       pc = 'h10000;
+    else
+       pc = pc + 4;	// XXX output of AGU
+  end
 endmodule
