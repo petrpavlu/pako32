@@ -3,6 +3,7 @@
 
 SUBDIRS = \
 	alu \
+	cpu \
 	pako32 \
 	registers
 
