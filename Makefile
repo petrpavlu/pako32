@@ -15,6 +15,7 @@ HDL_FILES = \
 	const.v \
 	cpu.v \
 	fifo_if.v \
+	mem_instr.v \
 	pako32.v \
 	prescaler.v \
 	registers.v \
