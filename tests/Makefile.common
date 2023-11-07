@@ -1,8 +1,9 @@
 # Copyright (C) 2023 Petr Pavlu <petr.pavlu@dagobah.cz>
 # SPDX-License-Identifier: MIT
 
-# Make sure cocotb libraries installed in a venv can be found.
-PYTHONPATH = $(shell cocotb-config --prefix)
+# Make sure that utils.py in this directory and cocotb libraries installed in
+# a venv can be found.
+PYTHONPATH = $(shell pwd)/..:$(shell cocotb-config --prefix)
 export PYTHONPATH
 
 # Configuration for cocotb.

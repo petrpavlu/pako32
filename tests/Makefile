@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: MIT
 
 SUBDIRS = \
-	pako32
+	pako32 \
+	registers
 
 .PHONY: all $(SUBDIRS)
 all: $(SUBDIRS)
