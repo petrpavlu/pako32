@@ -6,6 +6,7 @@ from cocotb.triggers import FallingEdge
 
 import utils
 
+
 @cocotb.test()
 async def test_reset(dut):
     """All registers are zero after the reset."""
@@ -19,6 +20,7 @@ async def test_reset(dut):
         await FallingEdge(dut.clk_i)
         assert dut.rs1_data_o.value == 0
         assert dut.rs2_data_o.value == 0
+
 
 @cocotb.test()
 async def test_write_x0(dut):
@@ -37,6 +39,7 @@ async def test_write_x0(dut):
     await FallingEdge(dut.clk_i)
     assert dut.rs1_data_o.value == 0
     assert dut.rs2_data_o.value == 0
+
 
 @cocotb.test()
 async def test_write_x1_x31(dut):
@@ -57,6 +60,7 @@ async def test_write_x1_x31(dut):
         assert dut.rs1_data_o.value == 0xa
         assert dut.rs2_data_o.value == 0xa
 
+
 @cocotb.test()
 async def test_write_without_en(dut):
     """Write without wr_en_i is ignored."""
@@ -67,6 +71,7 @@ async def test_write_without_en(dut):
     dut.rd_data_i.value = 1
     await FallingEdge(dut.clk_i)
     assert dut.regs.value == 31 * [0]
+
 
 @cocotb.test()
 async def test_read_independent(dut):
