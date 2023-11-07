@@ -13,6 +13,7 @@ PACKAGE = cm81
 HDL_FILES = \
 	alu.v \
 	const.v \
+	control.v \
 	cpu.v \
 	fifo_if.v \
 	mem_instr.v \
