@@ -76,6 +76,12 @@ module control
             alu_op_o = `ALU_OP_LT;
             alu_b_sel_o = `ALU_B_SEL_IMM;
           end
+          3'b011: begin // SLTIU
+            wr_en_o = 1;
+            imm_data_o = signed'(pc_data_i[31:20]);
+            alu_op_o = `ALU_OP_LTU;
+            alu_b_sel_o = `ALU_B_SEL_IMM;
+          end
         endcase
       end
       endcase
