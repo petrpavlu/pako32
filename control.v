@@ -19,7 +19,7 @@ module control
     output  logic [3:0] alu_op_o,
     output  logic alu_a_sel_o,
     output  logic alu_b_sel_o,
-    output  logic reg_sel_o,
+    output  logic rd_sel_o,
     output  logic pc_next_sel_o
   );
 
@@ -48,7 +48,7 @@ module control
     alu_op_o = `ALU_OP_ADD;
     alu_a_sel_o = `ALU_A_SEL_RS1;
     alu_b_sel_o = `ALU_B_SEL_RS2;
-    reg_sel_o = `REG_SEL_ALU;
+    rd_sel_o = `RD_SEL_ALU;
 
     if (state == ST_EXEC) begin
       case (pc_data_i[6:0])

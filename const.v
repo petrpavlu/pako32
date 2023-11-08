@@ -22,8 +22,8 @@
 `define ALU_B_SEL_RS2 0
 `define ALU_B_SEL_IMM 1
 
-`define REG_SEL_ALU 0
-`define REG_SEL_MEM 1
+`define RD_SEL_ALU 0
+`define RD_SEL_MEM 1
 
 `define PC_NEXT_SEL_SAME 0
 `define PC_NEXT_SEL_INC 1
