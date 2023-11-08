@@ -174,6 +174,18 @@ module control
                 end
               endcase
             end
+            3'b101: begin
+              case (pc_data_i[31:25])
+                7'b0000000: begin // SRL
+                  wr_en_o = 1;
+                  alu_op_o = `ALU_OP_SRL;
+                end
+                7'b0100000: begin // SRA
+                  wr_en_o = 1;
+                  alu_op_o = `ALU_OP_SRA;
+                end
+              endcase
+            end
           endcase
         end
       endcase
