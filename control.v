@@ -51,83 +51,83 @@ module control
 
     if (state == ST_EXEC) begin
       case (pc_data_i[6:0])
-      7'b0110111: begin // LUI
-        wr_en_o = 1;
-        imm_data_o = {pc_data_i[31:12], 12'h000};
-        rs1_idx_o = 0;
-        alu_b_sel_o = `ALU_B_SEL_IMM;
+        7'b0110111: begin // LUI
+          wr_en_o = 1;
+          imm_data_o = {pc_data_i[31:12], 12'h000};
+          rs1_idx_o = 0;
+          alu_b_sel_o = `ALU_B_SEL_IMM;
         end
-      7'b0010111: begin // AUIPC
-        wr_en_o = 1;
-        imm_data_o = {pc_data_i[31:12], 12'h000};
-        alu_a_sel_o = `ALU_A_SEL_PC;
-        alu_b_sel_o = `ALU_B_SEL_IMM;
+        7'b0010111: begin // AUIPC
+          wr_en_o = 1;
+          imm_data_o = {pc_data_i[31:12], 12'h000};
+          alu_a_sel_o = `ALU_A_SEL_PC;
+          alu_b_sel_o = `ALU_B_SEL_IMM;
         end
-      7'b0010011: begin // I-type
-        case (pc_data_i[14:12])
-          3'b000: begin // ADDI
-            wr_en_o = 1;
-            imm_data_o = signed'(pc_data_i[31:20]);
-            alu_b_sel_o = `ALU_B_SEL_IMM;
-          end
-          3'b010: begin // SLTI
-            wr_en_o = 1;
-            imm_data_o = signed'(pc_data_i[31:20]);
-            alu_op_o = `ALU_OP_LT;
-            alu_b_sel_o = `ALU_B_SEL_IMM;
-          end
-          3'b011: begin // SLTIU
-            wr_en_o = 1;
-            imm_data_o = signed'(pc_data_i[31:20]);
-            alu_op_o = `ALU_OP_LTU;
-            alu_b_sel_o = `ALU_B_SEL_IMM;
-          end
-          3'b100: begin // XORI
-            wr_en_o = 1;
-            imm_data_o = signed'(pc_data_i[31:20]);
-            alu_op_o = `ALU_OP_XOR;
-            alu_b_sel_o = `ALU_B_SEL_IMM;
-          end
-          3'b110: begin // ORI
-            wr_en_o = 1;
-            imm_data_o = signed'(pc_data_i[31:20]);
-            alu_op_o = `ALU_OP_OR;
-            alu_b_sel_o = `ALU_B_SEL_IMM;
-          end
-          3'b111: begin // ANDI
-            wr_en_o = 1;
-            imm_data_o = signed'(pc_data_i[31:20]);
-            alu_op_o = `ALU_OP_AND;
-            alu_b_sel_o = `ALU_B_SEL_IMM;
-          end
-          3'b001: begin
-            case (pc_data_i[31:25])
-              7'b0000000: begin // SLLI
-                wr_en_o = 1;
-                imm_data_o = pc_data_i[24:20];
-                alu_op_o = `ALU_OP_SLL;
-                alu_b_sel_o = `ALU_B_SEL_IMM;
-              end
-            endcase
-          end
-          3'b101: begin
-            case (pc_data_i[31:25])
-              7'b0000000: begin // SRLI
-                wr_en_o = 1;
-                imm_data_o = pc_data_i[24:20];
-                alu_op_o = `ALU_OP_SRL;
-                alu_b_sel_o = `ALU_B_SEL_IMM;
-              end
-              7'b0100000: begin // SRAI
-                wr_en_o = 1;
-                imm_data_o = pc_data_i[24:20];
-                alu_op_o = `ALU_OP_SRA;
-                alu_b_sel_o = `ALU_B_SEL_IMM;
-              end
-            endcase
-          end
-        endcase
-      end
+        7'b0010011: begin // I-type
+          case (pc_data_i[14:12])
+            3'b000: begin // ADDI
+              wr_en_o = 1;
+              imm_data_o = signed'(pc_data_i[31:20]);
+              alu_b_sel_o = `ALU_B_SEL_IMM;
+            end
+            3'b010: begin // SLTI
+              wr_en_o = 1;
+              imm_data_o = signed'(pc_data_i[31:20]);
+              alu_op_o = `ALU_OP_LT;
+              alu_b_sel_o = `ALU_B_SEL_IMM;
+            end
+            3'b011: begin // SLTIU
+              wr_en_o = 1;
+              imm_data_o = signed'(pc_data_i[31:20]);
+              alu_op_o = `ALU_OP_LTU;
+              alu_b_sel_o = `ALU_B_SEL_IMM;
+            end
+            3'b100: begin // XORI
+              wr_en_o = 1;
+              imm_data_o = signed'(pc_data_i[31:20]);
+              alu_op_o = `ALU_OP_XOR;
+              alu_b_sel_o = `ALU_B_SEL_IMM;
+            end
+            3'b110: begin // ORI
+              wr_en_o = 1;
+              imm_data_o = signed'(pc_data_i[31:20]);
+              alu_op_o = `ALU_OP_OR;
+              alu_b_sel_o = `ALU_B_SEL_IMM;
+            end
+            3'b111: begin // ANDI
+              wr_en_o = 1;
+              imm_data_o = signed'(pc_data_i[31:20]);
+              alu_op_o = `ALU_OP_AND;
+              alu_b_sel_o = `ALU_B_SEL_IMM;
+            end
+            3'b001: begin
+              case (pc_data_i[31:25])
+                7'b0000000: begin // SLLI
+                  wr_en_o = 1;
+                  imm_data_o = pc_data_i[24:20];
+                  alu_op_o = `ALU_OP_SLL;
+                  alu_b_sel_o = `ALU_B_SEL_IMM;
+                end
+              endcase
+            end
+            3'b101: begin
+              case (pc_data_i[31:25])
+                7'b0000000: begin // SRLI
+                  wr_en_o = 1;
+                  imm_data_o = pc_data_i[24:20];
+                  alu_op_o = `ALU_OP_SRL;
+                  alu_b_sel_o = `ALU_B_SEL_IMM;
+                end
+                7'b0100000: begin // SRAI
+                  wr_en_o = 1;
+                  imm_data_o = pc_data_i[24:20];
+                  alu_op_o = `ALU_OP_SRA;
+                  alu_b_sel_o = `ALU_B_SEL_IMM;
+                end
+              endcase
+            end
+          endcase
+        end
       endcase
     end
   end
