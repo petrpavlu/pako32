@@ -25,8 +25,9 @@
 `define RD_SEL_ALU 0
 `define RD_SEL_MEM 1
 
-`define PC_NEXT_SEL_SAME 0
-`define PC_NEXT_SEL_INC 1
+`define PC_NEXT_SEL_STALL 0
+`define PC_NEXT_SEL_PC_IMM 1
+`define PC_NEXT_SEL_RS1_IMM 2
 
 `define MEM_INSTR_ZERO 'h10000
 

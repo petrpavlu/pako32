@@ -116,6 +116,7 @@ module cpu
   logic [31:0] pc;
   logic [31:0] pc_next;
   logic [31:0] pc_data;
+  logic [31:0] pc_next_off;
   logic        pc_next_sel;
   logic        wr_en;
   logic [4:0]  rd_idx, rs1_idx, rs2_idx;
@@ -169,13 +170,20 @@ module cpu
     .alu_a_sel_o(alu_a_sel),
     .alu_b_sel_o(alu_b_sel),
     .rd_sel_o(rd_sel),
+    .pc_next_off_o(pc_next_off),
     .pc_next_sel_o(pc_next_sel)
   );
 
   assign rd_data_mx = rd_sel == `RD_SEL_ALU ? alu_res : 0; // XXX 0 should be memory
   assign alu_a_mx = alu_a_sel == `ALU_A_SEL_RS1 ? rs1_data : pc;
   assign alu_b_mx = alu_b_sel == `ALU_B_SEL_RS2 ? rs2_data : imm_data;
-  assign pc_next = pc_next_sel == `PC_NEXT_SEL_SAME ? pc : pc + 4;
+  always_comb begin
+    case (pc_next_sel)
+      `PC_NEXT_SEL_PC_IMM: pc_next = pc + pc_next_off;
+      // TODO `PC_NEXT_SEL_RS1_IMM: pc = rs1 + pc_next_off;
+      default: pc_next = pc; // PC_NEXT_SEL_STALL
+    endcase
+  end
 
   always_ff @(posedge clk_i or negedge rstn) begin
     if (~rstn)

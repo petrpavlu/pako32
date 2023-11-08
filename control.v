@@ -20,7 +20,8 @@ module control
     output  logic alu_a_sel_o,
     output  logic alu_b_sel_o,
     output  logic rd_sel_o,
-    output  logic pc_next_sel_o
+    output  logic [31:0] pc_next_off_o,
+    output  logic [1:0] pc_next_sel_o
   );
 
   localparam [2:0] ST_RESET = 'd0,
@@ -31,11 +32,11 @@ module control
   always_ff @(posedge clk_i or negedge rstn_i) begin
     if (~rstn_i) begin
       state <= ST_RESET;
-      pc_next_sel_o <= `PC_NEXT_SEL_SAME;
+      pc_next_sel_o <= `PC_NEXT_SEL_STALL;
     end
     else begin
       state <= ST_EXEC;
-      pc_next_sel_o <= `PC_NEXT_SEL_INC;
+      pc_next_sel_o <= `PC_NEXT_SEL_PC_IMM;
     end
   end
 
@@ -49,6 +50,7 @@ module control
     alu_a_sel_o = `ALU_A_SEL_RS1;
     alu_b_sel_o = `ALU_B_SEL_RS2;
     rd_sel_o = `RD_SEL_ALU;
+    pc_next_off_o = 4;
 
     if (state == ST_EXEC) begin
       case (pc_data_i[6:0])
@@ -63,6 +65,13 @@ module control
           imm_data_o = {pc_data_i[31:12], 12'h000};
           alu_a_sel_o = `ALU_A_SEL_PC;
           alu_b_sel_o = `ALU_B_SEL_IMM;
+        end
+        7'b1101111: begin // JAL
+          wr_en_o = 1;
+          imm_data_o = 4;
+          alu_a_sel_o = `ALU_A_SEL_PC;
+          alu_b_sel_o = `ALU_B_SEL_IMM;
+          pc_next_off_o = {pc_data_i[31], pc_data_i[19:12], pc_data_i[20], pc_data_i[30:21], 1'b0};
         end
         7'b0010011: begin // I-type
           case (pc_data_i[14:12])
