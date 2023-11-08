@@ -1,11 +1,7 @@
 # Copyright (C) 2023 Petr Pavlu <petr.pavlu@dagobah.cz>
 # SPDX-License-Identifier: MIT
 
-SUBDIRS = \
-	alu \
-	cpu \
-	pako32 \
-	registers
+SUBDIRS := $(filter-out __pycache__,$(patsubst ./%/,%,$(filter %/, $(wildcard ./*/))))
 
 .PHONY: all $(SUBDIRS)
 all: $(SUBDIRS)
