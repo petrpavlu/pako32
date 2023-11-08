@@ -39,53 +39,40 @@ module control
     end
   end
 
-  logic [6:0] opcode;
-
   always_comb begin
-    opcode = pc_data_i[6:0];
+    wr_en_o = 0;
+    rd_idx_o = pc_data_i[11:7];
+    imm_data_o = 0;
+    rs1_idx_o = pc_data_i[19:15];
+    alu_op_o = `ALU_OP_ADD;
+    alu_a_sel_o = `ALU_A_SEL_RS1;
+    alu_b_sel_o = `ALU_B_SEL_RS2;
+    reg_sel_o = `REG_SEL_ALU;
+
     if (state == ST_EXEC) begin
-      case (opcode)
+      case (pc_data_i[6:0])
       7'b0110111: begin // LUI
         wr_en_o = 1;
-        rd_idx_o = pc_data_i[11:7];
         imm_data_o = {pc_data_i[31:12], 12'h000};
         rs1_idx_o = 0;
-        alu_op_o = `ALU_OP_ADD;
-        alu_a_sel_o = `ALU_A_SEL_RS1;
         alu_b_sel_o = `ALU_B_SEL_IMM;
-        reg_sel_o = `REG_SEL_ALU;
         end
       7'b0010111: begin // AUIPC
         wr_en_o = 1;
-        rd_idx_o = pc_data_i[11:7];
         imm_data_o = {pc_data_i[31:12], 12'h000};
-        rs1_idx_o = 0;
-        alu_op_o = `ALU_OP_ADD;
         alu_a_sel_o = `ALU_A_SEL_PC;
         alu_b_sel_o = `ALU_B_SEL_IMM;
-        reg_sel_o = `REG_SEL_ALU;
         end
-      default: begin// fallback
-        wr_en_o = 0;
-        rd_idx_o = 0;
-        imm_data_o = 0;
-        rs1_idx_o = 0;
-        alu_op_o = `ALU_OP_ADD;
-        alu_a_sel_o = `ALU_A_SEL_RS1;
-        alu_b_sel_o = `ALU_B_SEL_RS2;
-        reg_sel_o = `REG_SEL_ALU;
-        end
+      7'b0010011: begin // I-type
+        case (pc_data_i[14:12])
+          3'b000: begin // ADDI
+            wr_en_o = 1;
+            imm_data_o = signed'(pc_data_i[31:20]);
+            alu_b_sel_o = `ALU_B_SEL_IMM;
+          end
+        endcase
+      end
       endcase
-    end
-    else begin // ST_RESET or an invalid state
-      wr_en_o = 0;
-      rd_idx_o = 0;
-      imm_data_o = 0;
-      rs1_idx_o = 0;
-      alu_op_o = `ALU_OP_ADD;
-      alu_a_sel_o = `ALU_A_SEL_RS1;
-      alu_b_sel_o = `ALU_B_SEL_RS2;
-      reg_sel_o = `REG_SEL_ALU;
     end
   end
 
