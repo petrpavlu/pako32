@@ -20,15 +20,26 @@ async def test_lui(dut):
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
     assert dut.u_registers.regs.value == 31 * [0]
 
     await FallingEdge(dut.clk_i)
     assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10008
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
     assert dut.u_registers.regs.value == 30 * [0] + [0xabcde000]
+
 
 @cocotb.test()
 async def test_luilui(dut):
-    """Check LUI."""
+    """Check LUI, followed by another LUI."""
     await utils.init_dut(dut)
 
     # lui x1, 0xabcde
@@ -45,12 +56,24 @@ async def test_luilui(dut):
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
     assert dut.u_registers.regs.value == 31 * [0]
 
     await FallingEdge(dut.clk_i)
     assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10008
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
     assert dut.u_registers.regs.value == 30 * [0] + [0xabcde000]
 
     await FallingEdge(dut.clk_i)
     assert dut.pc.value == 0x10008
+    assert dut.pc_next.value == 0x1000c
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
     assert dut.u_registers.regs.value == 30 * [0] + [0xedcba000]

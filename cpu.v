@@ -114,7 +114,9 @@ module cpu
 
    // CPU begins here
    logic [31:0] pc;
+   logic [31:0] pc_next;
    logic [31:0] pc_data;
+   logic        pc_sel_next;
    logic        wr_en;
    logic [4:0]  rd_idx, rs1_idx, rs2_idx;
    logic [31:0] rs1_data, rs2_data, imm_data;
@@ -127,7 +129,7 @@ module cpu
         .PROG_FILE("examples/calc/calc.text.txt")
    ) u_mem_instr (
         .clk_i(clk_i),
-        .pc_i(pc),
+        .pc_i(pc_next),
         .pc_data_o(pc_data)
    );
 
@@ -154,6 +156,9 @@ module cpu
    );
 
    control u_control(
+        .clk_i(clk_i),
+        .rstn_i(rstn),
+
         .pc_data_i(pc_data),
         .wr_en_o(wr_en),
         .rd_idx_o(rd_idx),
@@ -162,16 +167,19 @@ module cpu
         .imm_data_o(imm_data),
         .alu_ctrl_o(alu_ctrl),
         .alu_input_o(alu_input),
-        .reg_input_o(reg_input)
+        .reg_input_o(reg_input),
+        .pc_sel_next_o(pc_sel_next)
    );
 
    assign rd_data_mx = (reg_input == 1) ? 0 : alu_result; // XXX 0 should be memory
    assign alu_b_mx = (alu_input == 1) ? rs2_data : imm_data;
 
+  assign pc_next = pc_sel_next == 0 ? pc : pc + 4;
+
   always_ff @(posedge clk_i or negedge rstn) begin
     if (~rstn)
-       pc = `MEM_INSTR_ZERO;
+       pc <= `MEM_INSTR_ZERO;
     else
-       pc = pc + 4;	// XXX output of AGU
+       pc <= pc_next;
   end
 endmodule
