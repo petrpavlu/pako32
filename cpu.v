@@ -163,7 +163,7 @@ module cpu
     .wr_en_o(wr_en),
     .rd_idx_o(rd_idx),
     .rs1_idx_o(rs1_idx),
-    //.rs2_idx_o(rs2_idx),
+    .rs2_idx_o(rs2_idx),
     .imm_data_o(imm_data),
     .alu_op_o(alu_op),
     .alu_a_sel_o(alu_a_sel),

@@ -412,3 +412,67 @@ async def test_srai(dut):
     assert dut.pc_next.value == 0x10008
     assert dut.u_control.state == dut.u_control.ST_EXEC.value
     assert dut.u_registers.regs.value == 30 * [0] + [0xf8765432]
+
+
+@cocotb.test()
+async def test_add(dut):
+    """Check ADD."""
+    await utils.init_dut(dut)
+
+    # add x1, x1, x2
+    dut.u_mem_instr.mem[0].value = 0xb3
+    dut.u_mem_instr.mem[1].value = 0x80
+    dut.u_mem_instr.mem[2].value = 0x20
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x400
+    dut.u_registers.regs[2].value = 0x800
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x800, 0x400]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10008
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x800, 0x00000c00]
+
+
+@cocotb.test()
+async def test_sub(dut):
+    """Check SUB."""
+    await utils.init_dut(dut)
+
+    # sub x1, x1, x2
+    dut.u_mem_instr.mem[0].value = 0xb3
+    dut.u_mem_instr.mem[1].value = 0x80
+    dut.u_mem_instr.mem[2].value = 0x20
+    dut.u_mem_instr.mem[3].value = 0x40
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x400
+    dut.u_registers.regs[2].value = 0x800
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x800, 0x400]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10008
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x800, 0xfffffc00]

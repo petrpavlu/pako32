@@ -13,7 +13,7 @@ module control
     output  logic [4:0]  rd_idx_o,
 
     output  logic [4:0]  rs1_idx_o,
-    //output  logic [4:0]  rs2_idx_o,
+    output  logic [4:0]  rs2_idx_o,
 
     output  logic [31:0] imm_data_o,
     output  logic [3:0] alu_op_o,
@@ -44,6 +44,7 @@ module control
     rd_idx_o = pc_data_i[11:7];
     imm_data_o = 0;
     rs1_idx_o = pc_data_i[19:15];
+    rs2_idx_o = pc_data_i[24:20];
     alu_op_o = `ALU_OP_ADD;
     alu_a_sel_o = `ALU_A_SEL_RS1;
     alu_b_sel_o = `ALU_B_SEL_RS2;
@@ -123,6 +124,21 @@ module control
                   imm_data_o = pc_data_i[24:20];
                   alu_op_o = `ALU_OP_SRA;
                   alu_b_sel_o = `ALU_B_SEL_IMM;
+                end
+              endcase
+            end
+          endcase
+        end
+        7'b0110011: begin // R-type
+          case (pc_data_i[14:12])
+            3'b000: begin
+              case (pc_data_i[31:25])
+                7'b0000000: begin // ADD
+                  wr_en_o = 1;
+                end
+                7'b0100000: begin // SUB
+                  wr_en_o = 1;
+                  alu_op_o = `ALU_OP_SUB;
                 end
               endcase
             end
