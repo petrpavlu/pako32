@@ -100,6 +100,32 @@ module control
             alu_op_o = `ALU_OP_AND;
             alu_b_sel_o = `ALU_B_SEL_IMM;
           end
+          3'b001: begin
+            case (pc_data_i[31:25])
+              7'b0000000: begin // SLLI
+                wr_en_o = 1;
+                imm_data_o = pc_data_i[24:20];
+                alu_op_o = `ALU_OP_SLL;
+                alu_b_sel_o = `ALU_B_SEL_IMM;
+              end
+            endcase
+          end
+          3'b101: begin
+            case (pc_data_i[31:25])
+              7'b0000000: begin // SRLI
+                wr_en_o = 1;
+                imm_data_o = pc_data_i[24:20];
+                alu_op_o = `ALU_OP_SRL;
+                alu_b_sel_o = `ALU_B_SEL_IMM;
+              end
+              7'b0100000: begin // SRAI
+                wr_en_o = 1;
+                imm_data_o = pc_data_i[24:20];
+                alu_op_o = `ALU_OP_SRA;
+                alu_b_sel_o = `ALU_B_SEL_IMM;
+              end
+            endcase
+          end
         endcase
       end
       endcase

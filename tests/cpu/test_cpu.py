@@ -319,3 +319,96 @@ async def test_andi(dut):
     assert dut.pc_next.value == 0x10008
     assert dut.u_control.state == dut.u_control.ST_EXEC.value
     assert dut.u_registers.regs.value == 30 * [0] + [0x12345238]
+
+
+@cocotb.test()
+async def test_slli(dut):
+    """Check SLLI."""
+    await utils.init_dut(dut)
+
+    # slli x1, x1, 4
+    dut.u_mem_instr.mem[0].value = 0x93
+    dut.u_mem_instr.mem[1].value = 0x90
+    dut.u_mem_instr.mem[2].value = 0x40
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x87654321
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 30 * [0] + [0x87654321]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10008
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 30 * [0] + [0x76543210]
+
+
+@cocotb.test()
+async def test_srli(dut):
+    """Check SRLI."""
+    await utils.init_dut(dut)
+
+    # srli x1, x1, 4
+    dut.u_mem_instr.mem[0].value = 0x93
+    dut.u_mem_instr.mem[1].value = 0xd0
+    dut.u_mem_instr.mem[2].value = 0x40
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x87654321
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 30 * [0] + [0x87654321]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10008
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 30 * [0] + [0x08765432]
+
+
+@cocotb.test()
+async def test_srai(dut):
+    """Check SRAI."""
+    await utils.init_dut(dut)
+
+    # srai x1, x1, 4
+    dut.u_mem_instr.mem[0].value = 0x93
+    dut.u_mem_instr.mem[1].value = 0xd0
+    dut.u_mem_instr.mem[2].value = 0x40
+    dut.u_mem_instr.mem[3].value = 0x40
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x87654321
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 30 * [0] + [0x87654321]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10008
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 30 * [0] + [0xf8765432]
