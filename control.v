@@ -82,6 +82,24 @@ module control
             alu_op_o = `ALU_OP_LTU;
             alu_b_sel_o = `ALU_B_SEL_IMM;
           end
+          3'b100: begin // XORI
+            wr_en_o = 1;
+            imm_data_o = signed'(pc_data_i[31:20]);
+            alu_op_o = `ALU_OP_XOR;
+            alu_b_sel_o = `ALU_B_SEL_IMM;
+          end
+          3'b110: begin // ORI
+            wr_en_o = 1;
+            imm_data_o = signed'(pc_data_i[31:20]);
+            alu_op_o = `ALU_OP_OR;
+            alu_b_sel_o = `ALU_B_SEL_IMM;
+          end
+          3'b111: begin // ANDI
+            wr_en_o = 1;
+            imm_data_o = signed'(pc_data_i[31:20]);
+            alu_op_o = `ALU_OP_AND;
+            alu_b_sel_o = `ALU_B_SEL_IMM;
+          end
         endcase
       end
       endcase
