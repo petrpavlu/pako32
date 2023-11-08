@@ -6,7 +6,9 @@ CFLAGS = --target=riscv32-unknown-elf -march=rv32i -nostdlib -Wall -pedantic
 LDFLAGS = -T calc.lds
 
 .PHONY: all
-all: calc.text.txt calc.data.txt
+CALC_TEXT=calc.text.txt calc.text.txt01 calc.text.txt23
+CALC_DATA=calc.data.txt calc.data.txt01 calc.data.txt23
+all: $(CALC_TEXT) $(CALC_DATA)
 
 calc: calc.c calc.lds
 
@@ -16,9 +18,15 @@ calc.text.raw: calc
 calc.data.raw: calc
 	objcopy --dump-section .data=$@ $< /dev/null
 
+%.txt01: %.raw
+	hexdump -v -e '2/2 "%04x " "\n"' $< | cut -d" " -f1 >$@
+
+%.txt23: %.raw
+	hexdump -v -e '2/2 "%04x " "\n"' $< | cut -d" " -f2 >$@
+
 %.txt: %.raw
 	od --address-radix=none --format=x1 --output-duplicates --width=1 $< | tr --delete ' ' > $@
 
 .PHONY: clean
 clean:
-	rm -f calc calc.text.raw calc.text.txt calc.data.raw calc.data.txt
+	rm -f calc $(CALC_TEXT) $(CALC_DATA)
