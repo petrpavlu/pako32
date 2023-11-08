@@ -150,6 +150,22 @@ module control
                 end
               endcase
             end
+            3'b010: begin
+              case (pc_data_i[31:25])
+                7'b0000000: begin // SLT
+                  wr_en_o = 1;
+                  alu_op_o = `ALU_OP_LT;
+                end
+              endcase
+            end
+            3'b011: begin
+              case (pc_data_i[31:25])
+                7'b0000000: begin // SLTU
+                  wr_en_o = 1;
+                  alu_op_o = `ALU_OP_LTU;
+                end
+              endcase
+            end
           endcase
         end
       endcase

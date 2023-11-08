@@ -508,3 +508,91 @@ async def test_sll(dut):
     assert dut.pc_next.value == 0x10008
     assert dut.u_control.state == dut.u_control.ST_EXEC.value
     assert dut.u_registers.regs.value == 29 * [0] + [4, 0x76543210]
+
+
+@cocotb.test()
+async def test_slt(dut):
+    """Check SLT."""
+    await utils.init_dut(dut)
+
+    # slt x1, x0, x1
+    dut.u_mem_instr.mem[0].value = 0xb3
+    dut.u_mem_instr.mem[1].value = 0x20
+    dut.u_mem_instr.mem[2].value = 0x10
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    # slt x2, x0, x2
+    dut.u_mem_instr.mem[4].value = 0x33
+    dut.u_mem_instr.mem[5].value = 0x21
+    dut.u_mem_instr.mem[6].value = 0x20
+    dut.u_mem_instr.mem[7].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0xfffff800 # -2048
+    dut.u_registers.regs[2].value = 2047
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [2047, 0xfffff800]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10008
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [2047, 0]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10008
+    assert dut.pc_next.value == 0x1000c
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [1, 0]
+
+
+@cocotb.test()
+async def test_sltu(dut):
+    """Check SLTU."""
+    await utils.init_dut(dut)
+
+    # sltu x1, x0, x1
+    dut.u_mem_instr.mem[0].value = 0xb3
+    dut.u_mem_instr.mem[1].value = 0x30
+    dut.u_mem_instr.mem[2].value = 0x10
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    # sltu x2, x0, x2
+    dut.u_mem_instr.mem[4].value = 0x33
+    dut.u_mem_instr.mem[5].value = 0x31
+    dut.u_mem_instr.mem[6].value = 0x20
+    dut.u_mem_instr.mem[7].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0xfffff800 # -2048
+    dut.u_registers.regs[2].value = 0
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0, 0xfffff800]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10008
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0, 1]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10008
+    assert dut.pc_next.value == 0x1000c
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0, 1]
