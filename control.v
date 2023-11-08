@@ -30,14 +30,10 @@ module control
   logic [2:0] state;
 
   always_ff @(posedge clk_i or negedge rstn_i) begin
-    if (~rstn_i) begin
+    if (~rstn_i)
       state <= ST_RESET;
-      pc_next_sel_o <= `PC_NEXT_SEL_STALL;
-    end
-    else begin
+    else
       state <= ST_EXEC;
-      pc_next_sel_o <= `PC_NEXT_SEL_PC_IMM;
-    end
   end
 
   always_comb begin
@@ -51,8 +47,11 @@ module control
     alu_b_sel_o = `ALU_B_SEL_RS2;
     rd_sel_o = `RD_SEL_ALU;
     pc_next_off_o = 4;
+    pc_next_sel_o = `PC_NEXT_SEL_STALL;
 
     if (state == ST_EXEC) begin
+      pc_next_sel_o = `PC_NEXT_SEL_PC_IMM;
+
       case (pc_data_i[6:0])
         7'b0110111: begin // LUI
           wr_en_o = 1;
@@ -72,6 +71,14 @@ module control
           alu_a_sel_o = `ALU_A_SEL_PC;
           alu_b_sel_o = `ALU_B_SEL_IMM;
           pc_next_off_o = {pc_data_i[31], pc_data_i[19:12], pc_data_i[20], pc_data_i[30:21], 1'b0};
+        end
+        7'b1100111: begin // JALR
+          wr_en_o = 1;
+          imm_data_o = 4;
+          alu_a_sel_o = `ALU_A_SEL_PC;
+          alu_b_sel_o = `ALU_B_SEL_IMM;
+          pc_next_off_o = pc_data_i[31:20];
+          pc_next_sel_o = `PC_NEXT_SEL_RS1_IMM;
         end
         7'b0010011: begin // I-type
           case (pc_data_i[14:12])

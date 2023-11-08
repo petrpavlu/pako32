@@ -117,7 +117,7 @@ module cpu
   logic [31:0] pc_next;
   logic [31:0] pc_data;
   logic [31:0] pc_next_off;
-  logic        pc_next_sel;
+  logic [1:0]  pc_next_sel;
   logic        wr_en;
   logic [4:0]  rd_idx, rs1_idx, rs2_idx;
   logic [31:0] rs1_data, rs2_data, imm_data;
@@ -180,7 +180,7 @@ module cpu
   always_comb begin
     case (pc_next_sel)
       `PC_NEXT_SEL_PC_IMM: pc_next = pc + pc_next_off;
-      // TODO `PC_NEXT_SEL_RS1_IMM: pc = rs1 + pc_next_off;
+      `PC_NEXT_SEL_RS1_IMM: pc_next = rs1_data + pc_next_off;
       default: pc_next = pc; // PC_NEXT_SEL_STALL
     endcase
   end

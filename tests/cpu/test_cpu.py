@@ -140,6 +140,37 @@ async def test_jal(dut):
 
 
 @cocotb.test()
+async def test_jalr(dut):
+    """Check JALR."""
+    await utils.init_dut(dut)
+
+    # jalr x1, x2, 0x10
+    dut.u_mem_instr.mem[0].value = 0xe7
+    dut.u_mem_instr.mem[1].value = 0x00
+    dut.u_mem_instr.mem[2].value = 0x01
+    dut.u_mem_instr.mem[3].value = 0x01
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[2].value = 0x10010
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10020
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x10010, 0]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10020
+    assert dut.pc_next.value == 0x10024
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x10010, 0x10004]
+
+
+@cocotb.test()
 async def test_addi(dut):
     """Check ADDI."""
     await utils.init_dut(dut)
