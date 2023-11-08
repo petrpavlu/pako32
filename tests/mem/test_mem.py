@@ -7,6 +7,19 @@ from cocotb.triggers import FallingEdge
 import utils
 
 
+@cocotb.test(skip=True)
+async def test_init_read(dut):
+    """Read data from initialization."""
+    await utils.init_dut_noreset(dut)
+    # This test is skipped because it would need pass parameters:
+    # dut.DATA_FILE_01=./data.txt01
+    # dut.DATA_FILE_02=./data.txt02
+
+    dut.addr_r_i.value = 0
+    await FallingEdge(dut.clk_i)
+    assert dut.data_r_o.value == 0x203e
+
+
 @cocotb.test()
 async def test_write_32B(dut):
     """Writes to first 32B work as expected."""
