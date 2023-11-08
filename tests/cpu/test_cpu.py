@@ -476,3 +476,35 @@ async def test_sub(dut):
     assert dut.pc_next.value == 0x10008
     assert dut.u_control.state == dut.u_control.ST_EXEC.value
     assert dut.u_registers.regs.value == 29 * [0] + [0x800, 0xfffffc00]
+
+
+@cocotb.test()
+async def test_sll(dut):
+    """Check SLL."""
+    await utils.init_dut(dut)
+
+    # sll x1, x1, x2
+    dut.u_mem_instr.mem[0].value = 0xb3
+    dut.u_mem_instr.mem[1].value = 0x90
+    dut.u_mem_instr.mem[2].value = 0x20
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x87654321
+    dut.u_registers.regs[2].value = 4
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [4, 0x87654321]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10008
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [4, 0x76543210]

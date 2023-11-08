@@ -142,6 +142,14 @@ module control
                 end
               endcase
             end
+            3'b001: begin
+              case (pc_data_i[31:25])
+                7'b0000000: begin // SLL
+                  wr_en_o = 1;
+                  alu_op_o = `ALU_OP_SLL;
+                end
+              endcase
+            end
           endcase
         end
       endcase
