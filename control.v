@@ -9,7 +9,7 @@ module control
     input logic rstn_i,
     input logic [31:0] pc_data_i,
 
-    output  logic        wr_en_o,
+    output  logic        reg_wr_en_o,
     output  logic [4:0]  rd_idx_o,
 
     output  logic [4:0]  rs1_idx_o,
@@ -21,7 +21,12 @@ module control
     output  logic alu_b_sel_o,
     output  logic rd_sel_o,
     output  logic [31:0] pc_next_off_o,
-    output  logic [1:0] pc_next_sel_o
+    output  logic [1:0] pc_next_sel_o,
+
+    input   logic mem_wr_ready_i,
+    output  logic mem_wr_en_o,
+    output  logic mem_r_sext_o,
+    output  logic [1:0] mem_acc_r_o, mem_acc_w_o
   );
 
   localparam [2:0] ST_RESET = 'd0,
@@ -37,7 +42,7 @@ module control
   end
 
   always_comb begin
-    wr_en_o = 0;
+    reg_wr_en_o = 0;
     rd_idx_o = pc_data_i[11:7];
     imm_data_o = 0;
     rs1_idx_o = pc_data_i[19:15];
@@ -54,26 +59,26 @@ module control
 
       case (pc_data_i[6:0])
         7'b0110111: begin // LUI
-          wr_en_o = 1;
+          reg_wr_en_o = 1;
           imm_data_o = {pc_data_i[31:12], 12'h000};
           rs1_idx_o = 0;
           alu_b_sel_o = `ALU_B_SEL_IMM;
         end
         7'b0010111: begin // AUIPC
-          wr_en_o = 1;
+          reg_wr_en_o = 1;
           imm_data_o = {pc_data_i[31:12], 12'h000};
           alu_a_sel_o = `ALU_A_SEL_PC;
           alu_b_sel_o = `ALU_B_SEL_IMM;
         end
         7'b1101111: begin // JAL
-          wr_en_o = 1;
+          reg_wr_en_o = 1;
           imm_data_o = 4;
           alu_a_sel_o = `ALU_A_SEL_PC;
           alu_b_sel_o = `ALU_B_SEL_IMM;
           pc_next_off_o = {pc_data_i[31], pc_data_i[19:12], pc_data_i[20], pc_data_i[30:21], 1'b0};
         end
         7'b1100111: begin // JALR
-          wr_en_o = 1;
+          reg_wr_en_o = 1;
           imm_data_o = 4;
           alu_a_sel_o = `ALU_A_SEL_PC;
           alu_b_sel_o = `ALU_B_SEL_IMM;
@@ -83,36 +88,36 @@ module control
         7'b0010011: begin // I-type
           case (pc_data_i[14:12])
             3'b000: begin // ADDI
-              wr_en_o = 1;
+              reg_wr_en_o = 1;
               imm_data_o = signed'(pc_data_i[31:20]);
               alu_b_sel_o = `ALU_B_SEL_IMM;
             end
             3'b010: begin // SLTI
-              wr_en_o = 1;
+              reg_wr_en_o = 1;
               imm_data_o = signed'(pc_data_i[31:20]);
               alu_op_o = `ALU_OP_LT;
               alu_b_sel_o = `ALU_B_SEL_IMM;
             end
             3'b011: begin // SLTIU
-              wr_en_o = 1;
+              reg_wr_en_o = 1;
               imm_data_o = signed'(pc_data_i[31:20]);
               alu_op_o = `ALU_OP_LTU;
               alu_b_sel_o = `ALU_B_SEL_IMM;
             end
             3'b100: begin // XORI
-              wr_en_o = 1;
+              reg_wr_en_o = 1;
               imm_data_o = signed'(pc_data_i[31:20]);
               alu_op_o = `ALU_OP_XOR;
               alu_b_sel_o = `ALU_B_SEL_IMM;
             end
             3'b110: begin // ORI
-              wr_en_o = 1;
+              reg_wr_en_o = 1;
               imm_data_o = signed'(pc_data_i[31:20]);
               alu_op_o = `ALU_OP_OR;
               alu_b_sel_o = `ALU_B_SEL_IMM;
             end
             3'b111: begin // ANDI
-              wr_en_o = 1;
+              reg_wr_en_o = 1;
               imm_data_o = signed'(pc_data_i[31:20]);
               alu_op_o = `ALU_OP_AND;
               alu_b_sel_o = `ALU_B_SEL_IMM;
@@ -120,7 +125,7 @@ module control
             3'b001: begin
               case (pc_data_i[31:25])
                 7'b0000000: begin // SLLI
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   imm_data_o = pc_data_i[24:20];
                   alu_op_o = `ALU_OP_SLL;
                   alu_b_sel_o = `ALU_B_SEL_IMM;
@@ -130,13 +135,13 @@ module control
             3'b101: begin
               case (pc_data_i[31:25])
                 7'b0000000: begin // SRLI
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   imm_data_o = pc_data_i[24:20];
                   alu_op_o = `ALU_OP_SRL;
                   alu_b_sel_o = `ALU_B_SEL_IMM;
                 end
                 7'b0100000: begin // SRAI
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   imm_data_o = pc_data_i[24:20];
                   alu_op_o = `ALU_OP_SRA;
                   alu_b_sel_o = `ALU_B_SEL_IMM;
@@ -150,10 +155,10 @@ module control
             3'b000: begin
               case (pc_data_i[31:25])
                 7'b0000000: begin // ADD
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                 end
                 7'b0100000: begin // SUB
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   alu_op_o = `ALU_OP_SUB;
                 end
               endcase
@@ -161,7 +166,7 @@ module control
             3'b001: begin
               case (pc_data_i[31:25])
                 7'b0000000: begin // SLL
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   alu_op_o = `ALU_OP_SLL;
                 end
               endcase
@@ -169,7 +174,7 @@ module control
             3'b010: begin
               case (pc_data_i[31:25])
                 7'b0000000: begin // SLT
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   alu_op_o = `ALU_OP_LT;
                 end
               endcase
@@ -177,7 +182,7 @@ module control
             3'b011: begin
               case (pc_data_i[31:25])
                 7'b0000000: begin // SLTU
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   alu_op_o = `ALU_OP_LTU;
                 end
               endcase
@@ -185,7 +190,7 @@ module control
             3'b100: begin
               case (pc_data_i[31:25])
                 7'b0000000: begin // XOR
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   alu_op_o = `ALU_OP_XOR;
                 end
               endcase
@@ -193,11 +198,11 @@ module control
             3'b101: begin
               case (pc_data_i[31:25])
                 7'b0000000: begin // SRL
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   alu_op_o = `ALU_OP_SRL;
                 end
                 7'b0100000: begin // SRA
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   alu_op_o = `ALU_OP_SRA;
                 end
               endcase
@@ -205,7 +210,7 @@ module control
             3'b110: begin
               case (pc_data_i[31:25])
                 7'b0000000: begin // OR
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   alu_op_o = `ALU_OP_OR;
                 end
               endcase
@@ -213,7 +218,7 @@ module control
             3'b111: begin
               case (pc_data_i[31:25])
                 7'b0000000: begin // AND
-                  wr_en_o = 1;
+                  reg_wr_en_o = 1;
                   alu_op_o = `ALU_OP_AND;
                 end
               endcase

@@ -9,7 +9,8 @@ module mem_control
     input logic rstn_i,
 
     // read port
-    input  logic [1:0] acc_r_i,
+    input  logic        sext_i,
+    input  logic [1:0]  acc_r_i,
     input  logic [31:0] addr_r_i,
     output logic [31:0] data_r_o,
 
@@ -79,6 +80,7 @@ module mem_control
         `MEM_ACCESS_HALFWORD: data_r_o = signed'(16'(data_r >> (8 * (addr_r_i & 2))));
         default: data_r_o = data_r; // MEM_ACCESS_WORD
       endcase
+      // TODO implement sext_i
     end
   end
 

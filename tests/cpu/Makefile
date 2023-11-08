@@ -7,6 +7,8 @@ VERILOG_SOURCES = \
 	../../control.v \
 	../../cpu.v \
 	../../fifo_if.v \
+	../../mem_control.v \
+	../../mem_data.v \
 	../../mem_instr.v \
 	../../registers.v
 TOPLEVEL = cpu

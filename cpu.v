@@ -118,13 +118,17 @@ module cpu
   logic [31:0] pc_data;
   logic [31:0] pc_next_off;
   logic [1:0]  pc_next_sel;
-  logic        wr_en;
+  logic [31:0] mem_data;
+  logic        reg_wr_en, mem_wr_en;
   logic [4:0]  rd_idx, rs1_idx, rs2_idx;
   logic [31:0] rs1_data, rs2_data, imm_data;
   logic [3:0]  alu_op;
   logic [31:0] rd_data_mx, alu_a_mx, alu_b_mx;
   logic        rd_sel, alu_a_sel, alu_b_sel;
   logic [31:0] alu_res;
+  logic [1:0]  mem_acc_r, mem_acc_w;
+  logic        mem_wr_ready;
+  logic        mem_r_sext;
 
   mem_instr #(
     .PROG_FILE("examples/calc/calc.text.txt")
@@ -138,7 +142,7 @@ module cpu
     .clk_i(clk_i),
     .rstn_i(rstn),
 
-    .wr_en_i(wr_en),
+    .wr_en_i(reg_wr_en),
     .rd_idx_i(rd_idx),
     .rd_data_i(rd_data_mx),
 
@@ -156,22 +160,45 @@ module cpu
     .res(alu_res)
   );
 
+  mem_control u_mem_control(
+    .clk_i(clk_i),
+    .rstn_i(rstn),
+
+    .sext_i(mem_r_sext),
+    .acc_r_i(mem_acc_r),
+    .addr_r_i(alu_res),
+    .data_r_o(mem_data),
+
+    .wr_en_i(mem_wr_en),
+    .acc_w_i(mem_acc_w),
+    .addr_w_i(alu_res),
+    .data_w_i(rs2_data),
+    .wr_ready_o(mem_wr_ready)
+  );
+
   control u_control(
     .clk_i(clk_i),
     .rstn_i(rstn),
 
     .pc_data_i(pc_data),
-    .wr_en_o(wr_en),
+    .reg_wr_en_o(reg_wr_en),
     .rd_idx_o(rd_idx),
     .rs1_idx_o(rs1_idx),
     .rs2_idx_o(rs2_idx),
+
     .imm_data_o(imm_data),
     .alu_op_o(alu_op),
     .alu_a_sel_o(alu_a_sel),
     .alu_b_sel_o(alu_b_sel),
     .rd_sel_o(rd_sel),
     .pc_next_off_o(pc_next_off),
-    .pc_next_sel_o(pc_next_sel)
+    .pc_next_sel_o(pc_next_sel),
+
+    .mem_wr_ready_i(mem_wr_ready),
+    .mem_wr_en_o(mem_wr_en),
+    .mem_r_sext_o(mem_r_sext),
+    .mem_acc_r_o(mem_acc_r),
+    .mem_acc_w_o(mem_acc_w)
   );
 
   assign rd_data_mx = rd_sel == `RD_SEL_ALU ? alu_res : 0; // XXX 0 should be memory
