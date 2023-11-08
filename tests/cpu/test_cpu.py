@@ -77,3 +77,33 @@ async def test_luilui(dut):
     assert dut.pc_next.value == 0x1000c
     assert dut.u_control.state == dut.u_control.ST_EXEC.value
     assert dut.u_registers.regs.value == 30 * [0] + [0xedcba000]
+
+
+@cocotb.test()
+async def test_auipc(dut):
+    """Check AUIPC."""
+    await utils.init_dut(dut)
+
+    # auipc x1, 0xabcde
+    dut.u_mem_instr.mem[0].value = 0x97
+    dut.u_mem_instr.mem[1].value = 0xe0
+    dut.u_mem_instr.mem[2].value = 0xcd
+    dut.u_mem_instr.mem[3].value = 0xab
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10008
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 30 * [0] + [0xabcee000]

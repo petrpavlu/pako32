@@ -121,8 +121,8 @@ module cpu
   logic [4:0]  rd_idx, rs1_idx, rs2_idx;
   logic [31:0] rs1_data, rs2_data, imm_data;
   logic [3:0]  alu_ctrl;
-  logic [31:0] rd_data_mx, alu_b_mx;
-  logic        reg_input, alu_input;
+  logic [31:0] rd_data_mx, alu_a_mx, alu_b_mx;
+  logic        reg_input, alu_a_input, alu_b_input;
   logic [31:0] alu_result;
 
   mem_instr #(
@@ -149,7 +149,7 @@ module cpu
   );
 
   alu u_alu(
-    .a(rs1_data),
+    .a(alu_a_mx),
     .b(alu_b_mx),
     .control(alu_ctrl),
     .result(alu_result)
@@ -166,14 +166,15 @@ module cpu
     //.rs2_idx_o(rs2_idx),
     .imm_data_o(imm_data),
     .alu_ctrl_o(alu_ctrl),
-    .alu_input_o(alu_input),
+    .alu_a_input_o(alu_a_input),
+    .alu_b_input_o(alu_b_input),
     .reg_input_o(reg_input),
     .pc_sel_next_o(pc_sel_next)
   );
 
   assign rd_data_mx = (reg_input == 1) ? 0 : alu_result; // XXX 0 should be memory
-  assign alu_b_mx = (alu_input == 1) ? rs2_data : imm_data;
-
+  assign alu_a_mx = (alu_a_input == 1) ? pc : rs1_data;
+  assign alu_b_mx = (alu_b_input == 1) ? rs2_data : imm_data;
   assign pc_next = pc_sel_next == 0 ? pc : pc + 4;
 
   always_ff @(posedge clk_i or negedge rstn) begin
