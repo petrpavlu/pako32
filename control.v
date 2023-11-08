@@ -16,7 +16,7 @@ module control
     //output  logic [4:0]  rs2_idx_o,
 
     output  logic [31:0] imm_data_o,
-    output  logic [3:0] alu_ctrl_o,
+    output  logic [3:0] alu_op_o,
     output  logic alu_a_sel_o,
     output  logic alu_b_sel_o,
     output  logic reg_sel_o,
@@ -50,7 +50,7 @@ module control
         rd_idx_o = pc_data_i[11:7];
         imm_data_o = {pc_data_i[31:12], 12'h000};
         rs1_idx_o = 0;
-        alu_ctrl_o = `ALU_OP_ADD;
+        alu_op_o = `ALU_OP_ADD;
         alu_a_sel_o = `ALU_A_SEL_RS1;
         alu_b_sel_o = `ALU_B_SEL_IMM;
         reg_sel_o = `REG_SEL_ALU;
@@ -60,7 +60,7 @@ module control
         rd_idx_o = pc_data_i[11:7];
         imm_data_o = {pc_data_i[31:12], 12'h000};
         rs1_idx_o = 0;
-        alu_ctrl_o = `ALU_OP_ADD;
+        alu_op_o = `ALU_OP_ADD;
         alu_a_sel_o = `ALU_A_SEL_PC;
         alu_b_sel_o = `ALU_B_SEL_IMM;
         reg_sel_o = `REG_SEL_ALU;
@@ -70,7 +70,7 @@ module control
         rd_idx_o = 0;
         imm_data_o = 0;
         rs1_idx_o = 0;
-        alu_ctrl_o = `ALU_OP_ADD;
+        alu_op_o = `ALU_OP_ADD;
         alu_a_sel_o = `ALU_A_SEL_RS1;
         alu_b_sel_o = `ALU_B_SEL_RS2;
         reg_sel_o = `REG_SEL_ALU;
@@ -82,7 +82,7 @@ module control
       rd_idx_o = 0;
       imm_data_o = 0;
       rs1_idx_o = 0;
-      alu_ctrl_o = `ALU_OP_ADD;
+      alu_op_o = `ALU_OP_ADD;
       alu_a_sel_o = `ALU_A_SEL_RS1;
       alu_b_sel_o = `ALU_B_SEL_RS2;
       reg_sel_o = `REG_SEL_ALU;

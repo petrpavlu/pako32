@@ -7,27 +7,27 @@ module alu
   (
     input logic [31:0] a,
     input logic [31:0] b,
-    input logic [3:0] control,
-    output logic [31:0] result
+    input logic [3:0] op,
+    output logic [31:0] res
   );
 
   always_comb begin
-    case (control)
-      `ALU_OP_ADD: result = a + b;
-      `ALU_OP_SUB: result = a - b;
-      `ALU_OP_AND: result = a & b;
-      `ALU_OP_OR:  result = a | b;
-      `ALU_OP_XOR: result = a ^ b;
-      `ALU_OP_SLL: result = a << b;
-      `ALU_OP_SRL: result = a >> b;
-      `ALU_OP_SRA: result = signed'(a) >>> b;
-      `ALU_OP_EQ:  result = a == b;
-      `ALU_OP_NE:  result = a != b;
-      `ALU_OP_LT:  result = signed'(a) < signed'(b);
-      `ALU_OP_GE:  result = signed'(a) >= signed'(b);
-      `ALU_OP_LTU: result = a < b;
-      `ALU_OP_GEU: result = a >= b;
-      default: result = 'x;
+    case (op)
+      `ALU_OP_ADD: res = a + b;
+      `ALU_OP_SUB: res = a - b;
+      `ALU_OP_AND: res = a & b;
+      `ALU_OP_OR:  res = a | b;
+      `ALU_OP_XOR: res = a ^ b;
+      `ALU_OP_SLL: res = a << b;
+      `ALU_OP_SRL: res = a >> b;
+      `ALU_OP_SRA: res = signed'(a) >>> b;
+      `ALU_OP_EQ:  res = a == b;
+      `ALU_OP_NE:  res = a != b;
+      `ALU_OP_LT:  res = signed'(a) < signed'(b);
+      `ALU_OP_GE:  res = signed'(a) >= signed'(b);
+      `ALU_OP_LTU: res = a < b;
+      `ALU_OP_GEU: res = a >= b;
+      default: res = 'x;
     endcase
   end
 endmodule

@@ -120,10 +120,10 @@ module cpu
   logic        wr_en;
   logic [4:0]  rd_idx, rs1_idx, rs2_idx;
   logic [31:0] rs1_data, rs2_data, imm_data;
-  logic [3:0]  alu_ctrl;
+  logic [3:0]  alu_op;
   logic [31:0] rd_data_mx, alu_a_mx, alu_b_mx;
   logic        reg_sel, alu_a_sel, alu_b_sel;
-  logic [31:0] alu_result;
+  logic [31:0] alu_res;
 
   mem_instr #(
     .PROG_FILE("examples/calc/calc.text.txt")
@@ -151,8 +151,8 @@ module cpu
   alu u_alu(
     .a(alu_a_mx),
     .b(alu_b_mx),
-    .control(alu_ctrl),
-    .result(alu_result)
+    .op(alu_op),
+    .res(alu_res)
   );
 
   control u_control(
@@ -165,14 +165,14 @@ module cpu
     .rs1_idx_o(rs1_idx),
     //.rs2_idx_o(rs2_idx),
     .imm_data_o(imm_data),
-    .alu_ctrl_o(alu_ctrl),
+    .alu_op_o(alu_op),
     .alu_a_sel_o(alu_a_sel),
     .alu_b_sel_o(alu_b_sel),
     .reg_sel_o(reg_sel),
     .pc_next_sel_o(pc_next_sel)
   );
 
-  assign rd_data_mx = reg_sel == `REG_SEL_ALU ? alu_result : 0; // XXX 0 should be memory
+  assign rd_data_mx = reg_sel == `REG_SEL_ALU ? alu_res : 0; // XXX 0 should be memory
   assign alu_a_mx = alu_a_sel == `ALU_A_SEL_RS1 ? rs1_data : pc;
   assign alu_b_mx = alu_b_sel == `ALU_B_SEL_RS2 ? rs2_data : imm_data;
   assign pc_next = pc_next_sel == `PC_NEXT_SEL_SAME ? pc : pc + 4;
