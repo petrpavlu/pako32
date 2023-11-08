@@ -16,7 +16,9 @@ module mem_data
     input  logic [31:0] data_w_i
   );
 
-  parameter DATA_FILE = "";
+  // Datafiles contain 16b values
+  parameter DATA_FILE_01 = "";
+  parameter DATA_FILE_23 = "";
   parameter ROWS      = 512;
 
   logic [15:0] mem_01 [ROWS-1:0];
@@ -24,7 +26,12 @@ module mem_data
 
   logic [31:0] addr_r, addr_w;
 
-  // TODO init
+  initial begin
+    if (DATA_FILE_01 != "" && DATA_FILE_23 != "") begin
+      $readmemh(DATA_FILE_01, mem_01, 0, ROWS - 1);
+      $readmemh(DATA_FILE_23, mem_23, 0, ROWS - 1);
+    end
+  end
  
   always_comb begin
     addr_r = addr_r_i >> 2;
