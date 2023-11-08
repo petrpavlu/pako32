@@ -186,6 +186,22 @@ module control
                 end
               endcase
             end
+            3'b110: begin
+              case (pc_data_i[31:25])
+                7'b0000000: begin // OR
+                  wr_en_o = 1;
+                  alu_op_o = `ALU_OP_OR;
+                end
+              endcase
+            end
+            3'b111: begin
+              case (pc_data_i[31:25])
+                7'b0000000: begin // AND
+                  wr_en_o = 1;
+                  alu_op_o = `ALU_OP_AND;
+                end
+              endcase
+            end
           endcase
         end
       endcase
