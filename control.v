@@ -17,10 +17,10 @@ module control
 
     output  logic [31:0] imm_data_o,
     output  logic [3:0] alu_ctrl_o,
-    output  logic alu_a_input_o, // 0: rs1, 1: pc
-    output  logic alu_b_input_o, // 0: imm, 1: rs2
-    output  logic reg_input_o, // 0: alu, 1: mem
-    output  logic pc_sel_next_o // 0: same, 1: inc
+    output  logic alu_a_sel_o,
+    output  logic alu_b_sel_o,
+    output  logic reg_sel_o,
+    output  logic pc_next_sel_o
   );
 
   localparam [2:0] ST_RESET = 'd0,
@@ -31,11 +31,11 @@ module control
   always_ff @(posedge clk_i or negedge rstn_i) begin
     if (~rstn_i) begin
       state <= ST_RESET;
-      pc_sel_next_o <= 0;
+      pc_next_sel_o <= `PC_NEXT_SEL_SAME;
     end
     else begin
       state <= ST_EXEC;
-      pc_sel_next_o <= 1;
+      pc_next_sel_o <= `PC_NEXT_SEL_INC;
     end
   end
 
@@ -51,9 +51,9 @@ module control
         imm_data_o = {pc_data_i[31:12], 12'h000};
         rs1_idx_o = 0;
         alu_ctrl_o = `ALU_OP_ADD;
-        alu_a_input_o = 0;
-        alu_b_input_o = 0;
-        reg_input_o = 0;
+        alu_a_sel_o = `ALU_A_SEL_RS1;
+        alu_b_sel_o = `ALU_B_SEL_IMM;
+        reg_sel_o = `REG_SEL_ALU;
         end
       7'b0010111: begin // AUIPC
         wr_en_o = 1;
@@ -61,9 +61,9 @@ module control
         imm_data_o = {pc_data_i[31:12], 12'h000};
         rs1_idx_o = 0;
         alu_ctrl_o = `ALU_OP_ADD;
-        alu_a_input_o = 1;
-        alu_b_input_o = 0;
-        reg_input_o = 0;
+        alu_a_sel_o = `ALU_A_SEL_PC;
+        alu_b_sel_o = `ALU_B_SEL_IMM;
+        reg_sel_o = `REG_SEL_ALU;
         end
       default: begin// fallback
         wr_en_o = 0;
@@ -71,9 +71,9 @@ module control
         imm_data_o = 0;
         rs1_idx_o = 0;
         alu_ctrl_o = `ALU_OP_ADD;
-        alu_a_input_o = 0;
-        alu_b_input_o = 0;
-        reg_input_o = 0;
+        alu_a_sel_o = `ALU_A_SEL_RS1;
+        alu_b_sel_o = `ALU_B_SEL_RS2;
+        reg_sel_o = `REG_SEL_ALU;
         end
       endcase
     end
@@ -83,9 +83,9 @@ module control
       imm_data_o = 0;
       rs1_idx_o = 0;
       alu_ctrl_o = `ALU_OP_ADD;
-      alu_a_input_o = 0;
-      alu_b_input_o = 0;
-      reg_input_o = 0;
+      alu_a_sel_o = `ALU_A_SEL_RS1;
+      alu_b_sel_o = `ALU_B_SEL_RS2;
+      reg_sel_o = `REG_SEL_ALU;
     end
   end
 

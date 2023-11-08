@@ -16,4 +16,16 @@
 `define ALU_OP_LTU 12
 `define ALU_OP_GEU 13
 
+`define ALU_A_SEL_RS1 0
+`define ALU_A_SEL_PC 1
+
+`define ALU_B_SEL_RS2 0
+`define ALU_B_SEL_IMM 1
+
+`define REG_SEL_ALU 0
+`define REG_SEL_MEM 1
+
+`define PC_NEXT_SEL_SAME 0
+`define PC_NEXT_SEL_INC 1
+
 `define MEM_INSTR_ZERO 'h10000
