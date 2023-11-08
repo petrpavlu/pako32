@@ -29,3 +29,7 @@
 `define PC_NEXT_SEL_INC 1
 
 `define MEM_INSTR_ZERO 'h10000
+
+`define MEM_ACCESS_BYTE 0
+`define MEM_ACCESS_HALFWORD 1
+`define MEM_ACCESS_WORD 2
