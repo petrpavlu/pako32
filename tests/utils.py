@@ -9,6 +9,12 @@ from cocotb.triggers import FallingEdge
 CLK_16MHZ_NS = 1_000_000_000 / 16_000_000
 
 
+async def init_dut_noreset(dut):
+    clock = Clock(dut.clk_i, CLK_16MHZ_NS, units='ns')
+    cocotb.start_soon(clock.start(start_high=False))
+
+    await FallingEdge(dut.clk_i)
+
 async def init_dut(dut):
     clock = Clock(dut.clk_i, CLK_16MHZ_NS, units='ns')
     cocotb.start_soon(clock.start(start_high=False))
