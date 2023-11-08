@@ -44,5 +44,3 @@ module registers
        regs[rd_idx_i] <= rd_data_i;
   end
 endmodule
-
-

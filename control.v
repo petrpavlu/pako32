@@ -76,5 +76,3 @@ module control
   end
 
 endmodule
-
-
