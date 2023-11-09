@@ -224,6 +224,236 @@ async def test_beq(dut):
 
 
 @cocotb.test()
+async def test_bne(dut):
+    """Check BNE."""
+    await init_dut(dut)
+
+    # bne x1, x2, 0x10
+    dut.u_mem_instr.mem[0].value = 0x63
+    dut.u_mem_instr.mem[1].value = 0x98
+    dut.u_mem_instr.mem[2].value = 0x20
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    # bne x3, x4, 0x10
+    dut.u_mem_instr.mem[4].value = 0x63
+    dut.u_mem_instr.mem[5].value = 0x98
+    dut.u_mem_instr.mem[6].value = 0x41
+    dut.u_mem_instr.mem[7].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x10
+    dut.u_registers.regs[2].value = 0x10
+    dut.u_registers.regs[3].value = 0x20
+    dut.u_registers.regs[4].value = 0x21
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x21, 0x20, 0x10, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10014
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x21, 0x20, 0x10, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10014
+    assert dut.pc_next.value == 0x10018
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x21, 0x20, 0x10, 0x10]
+
+
+@cocotb.test()
+async def test_blt(dut):
+    """Check BLT."""
+    await init_dut(dut)
+
+    # blt x1, x2, 0x10
+    dut.u_mem_instr.mem[0].value = 0x63
+    dut.u_mem_instr.mem[1].value = 0xc8
+    dut.u_mem_instr.mem[2].value = 0x20
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    # blt x3, x4, 0x10
+    dut.u_mem_instr.mem[4].value = 0x63
+    dut.u_mem_instr.mem[5].value = 0xc8
+    dut.u_mem_instr.mem[6].value = 0x41
+    dut.u_mem_instr.mem[7].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x10
+    dut.u_registers.regs[2].value = 0x10
+    dut.u_registers.regs[3].value = 0xffffffff
+    dut.u_registers.regs[4].value = 0x20
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0xffffffff, 0x10, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10014
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0xffffffff, 0x10, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10014
+    assert dut.pc_next.value == 0x10018
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0xffffffff, 0x10, 0x10]
+
+
+@cocotb.test()
+async def test_bge(dut):
+    """Check BGE."""
+    await init_dut(dut)
+
+    # bge x1, x2, 0x10
+    dut.u_mem_instr.mem[0].value = 0x63
+    dut.u_mem_instr.mem[1].value = 0xd8
+    dut.u_mem_instr.mem[2].value = 0x20
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    # bge x3, x4, 0x10
+    dut.u_mem_instr.mem[4].value = 0x63
+    dut.u_mem_instr.mem[5].value = 0xd8
+    dut.u_mem_instr.mem[6].value = 0x41
+    dut.u_mem_instr.mem[7].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x10
+    dut.u_registers.regs[2].value = 0x11
+    dut.u_registers.regs[3].value = 0x20
+    dut.u_registers.regs[4].value = 0xffffffff
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0xffffffff, 0x20, 0x11, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10014
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0xffffffff, 0x20, 0x11, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10014
+    assert dut.pc_next.value == 0x10018
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0xffffffff, 0x20, 0x11, 0x10]
+
+
+@cocotb.test()
+async def test_bltu(dut):
+    """Check BLTU."""
+    await init_dut(dut)
+
+    # bltu x1, x2, 0x10
+    dut.u_mem_instr.mem[0].value = 0x63
+    dut.u_mem_instr.mem[1].value = 0xe8
+    dut.u_mem_instr.mem[2].value = 0x20
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    # bltu x3, x4, 0x10
+    dut.u_mem_instr.mem[4].value = 0x63
+    dut.u_mem_instr.mem[5].value = 0xe8
+    dut.u_mem_instr.mem[6].value = 0x41
+    dut.u_mem_instr.mem[7].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x10
+    dut.u_registers.regs[2].value = 0x10
+    dut.u_registers.regs[3].value = 0x20
+    dut.u_registers.regs[4].value = 0xffffffff
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0xffffffff, 0x20, 0x10, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10014
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0xffffffff, 0x20, 0x10, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10014
+    assert dut.pc_next.value == 0x10018
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0xffffffff, 0x20, 0x10, 0x10]
+
+
+@cocotb.test()
+async def test_bgeu(dut):
+    """Check BGEU."""
+    await init_dut(dut)
+
+    # bgeu x1, x2, 0x10
+    dut.u_mem_instr.mem[0].value = 0x63
+    dut.u_mem_instr.mem[1].value = 0xf8
+    dut.u_mem_instr.mem[2].value = 0x20
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    # bgeu x3, x4, 0x10
+    dut.u_mem_instr.mem[4].value = 0x63
+    dut.u_mem_instr.mem[5].value = 0xf8
+    dut.u_mem_instr.mem[6].value = 0x41
+    dut.u_mem_instr.mem[7].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x10
+    dut.u_registers.regs[2].value = 0x11
+    dut.u_registers.regs[3].value = 0xffffffff
+    dut.u_registers.regs[4].value = 0x20
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0xffffffff, 0x11, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10014
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0xffffffff, 0x11, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10014
+    assert dut.pc_next.value == 0x10018
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0xffffffff, 0x11, 0x10]
+
+
+@cocotb.test()
 async def test_addi(dut):
     """Check ADDI."""
     await init_dut(dut)

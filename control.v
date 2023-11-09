@@ -95,6 +95,31 @@ module control
               pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
               pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
             end
+            3'b001: begin // BNE
+              alu_op_o = `ALU_OP_NE;
+              pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
+              pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
+            end
+            3'b100: begin // BLT
+              alu_op_o = `ALU_OP_LT;
+              pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
+              pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
+            end
+            3'b101: begin // BGE
+              alu_op_o = `ALU_OP_GE;
+              pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
+              pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
+            end
+            3'b110: begin // BLTU
+              alu_op_o = `ALU_OP_LTU;
+              pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
+              pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
+            end
+            3'b111: begin // BGEU
+              alu_op_o = `ALU_OP_GEU;
+              pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
+              pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
+            end
           endcase
         end
         7'b0010011: begin // I-type
