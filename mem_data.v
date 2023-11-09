@@ -7,6 +7,7 @@ module mem_data
   (
     input logic clk_i,
     // read port
+    input  logic        r_en_i,
     input  logic [31:0] addr_r_i,
     output logic [31:0] data_r_o,
 
@@ -43,7 +44,9 @@ module mem_data
       mem_23[addr_w] <= data_w_i[31:16];
       mem_01[addr_w] <= data_w_i[15:0];
     end
-    data_r_o <= {mem_23[addr_r], mem_01[addr_r]};
+    if (r_en_i) begin
+      data_r_o <= {mem_23[addr_r], mem_01[addr_r]};
+    end
   end
 
 endmodule

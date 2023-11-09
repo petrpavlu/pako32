@@ -10,6 +10,7 @@ module mem_control
 
     // read port
     input  logic        sext_i,
+    input  logic        r_en_i,
     input  logic [1:0]  acc_r_i,
     input  logic [31:0] addr_r_i,
     output logic [31:0] data_r_o,
@@ -29,6 +30,7 @@ module mem_control
                    ST_WRITE_PENDING = 'd2;
 
   logic [1:0]  state;
+  logic        r_en;
   logic [31:0] addr_r;
   logic [31:0] data_r;
   logic        wr_en;
@@ -38,9 +40,10 @@ module mem_control
   // TODO Check correct alignment.
 
   always_comb begin
-    wr_en = 0;
+    r_en = r_en_i;
     addr_r = 0;
     data_r_o = 0;
+    wr_en = 0;
     addr_w = 0;
     data_w = 0;
 
@@ -48,7 +51,8 @@ module mem_control
 
     if (state == ST_READY && wr_en_i) begin
       // writing -- read of the original data
-      addr_r = addr_w_i & 'hfffffffc;
+      r_en = 1; // XXX back to 0?
+      addr_r = (addr_w_i & 'hfffffffc) - MAP_ZERO;
     end
     else if (state == ST_WRITE_PENDING) begin
       // writing -- store of the updated data
@@ -73,7 +77,7 @@ module mem_control
         default: data_w = data_w_i; // MEM_ACCESS_WORD
       endcase
     end
-    else begin
+    else if (r_en_i) begin
       // reading
       addr_r = (addr_r_i & 'hfffffffc) - MAP_ZERO;
 
@@ -108,6 +112,7 @@ module mem_control
 
   mem_data u_mem_data(
     .clk_i(clk_i),
+    .r_en_i(r_en),
     .addr_r_i(addr_r),
     .data_r_o(data_r),
     .wr_en_i(wr_en),

@@ -27,6 +27,7 @@ module control
     input   logic mem_wr_ready_i,
     output  logic mem_wr_en_o,
     output  logic mem_r_sext_o,
+    output  logic mem_r_en_o,
     output  logic [1:0] mem_acc_r_o, mem_acc_w_o
   );
 
@@ -59,6 +60,7 @@ module control
     pc_next_sel_o = `PC_NEXT_SEL_STALL;
     mem_wr_en_o = 0;
     mem_r_sext_o = 0;
+    mem_r_en_o = 0;
     mem_acc_r_o = `MEM_ACCESS_BYTE;
     mem_acc_w_o = `MEM_ACCESS_BYTE;
 
@@ -137,6 +139,7 @@ module control
           rd_sel_o = `RD_SEL_MEM;
           pc_next_sel_o = state == ST_READ_STALL ? `PC_NEXT_SEL_NEXT : `PC_NEXT_SEL_STALL;
           mem_r_sext_o = ~pc_data_i[14];
+          mem_r_en_o = 1;
           mem_acc_r_o = pc_data_i[13:12];
 
           state_next = state == ST_READ_STALL ? ST_EXEC : ST_READ_STALL;
