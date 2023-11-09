@@ -454,6 +454,114 @@ async def test_bgeu(dut):
 
 
 @cocotb.test()
+async def test_lb(dut):
+    """Check LW."""
+    await utils.init_dut(dut)
+
+    # lb x1, x2, 0x7
+    dut.u_mem_instr.mem[0].value = 0x83
+    dut.u_mem_instr.mem[1].value = 0x00
+    dut.u_mem_instr.mem[2].value = 0x71
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    dut.u_mem_control.u_mem_data.mem_01[0].value = 0xbeef
+    dut.u_mem_control.u_mem_data.mem_23[0].value = 0xdead
+    dut.u_mem_control.u_mem_data.mem_01[1].value = 0xef01
+    dut.u_mem_control.u_mem_data.mem_23[1].value = 0xabcd
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+    dut.u_registers.regs[2].value = 0x20000
+
+    await FallingEdge(dut.clk_i)
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x20000, 0]
+
+    retries = 5
+    while dut.pc.value == 0x10000 and retries > 0:
+        retries -= 1
+        await FallingEdge(dut.clk_i)
+
+    assert dut.pc.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x20000, 0xffffffab]
+
+
+@cocotb.test()
+async def test_lh(dut):
+    """Check LW."""
+    await utils.init_dut(dut)
+
+    # lh x1, x2, 0x6
+    dut.u_mem_instr.mem[0].value = 0x83
+    dut.u_mem_instr.mem[1].value = 0x10
+    dut.u_mem_instr.mem[2].value = 0x61
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    dut.u_mem_control.u_mem_data.mem_01[0].value = 0xbeef
+    dut.u_mem_control.u_mem_data.mem_23[0].value = 0xdead
+    dut.u_mem_control.u_mem_data.mem_01[1].value = 0xef01
+    dut.u_mem_control.u_mem_data.mem_23[1].value = 0xabcd
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+    dut.u_registers.regs[2].value = 0x20000
+
+    await FallingEdge(dut.clk_i)
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x20000, 0]
+
+    retries = 5
+    while dut.pc.value == 0x10000 and retries > 0:
+        retries -= 1
+        await FallingEdge(dut.clk_i)
+
+    assert dut.pc.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x20000, 0xffffabcd]
+
+
+@cocotb.test()
+async def test_lw(dut):
+    """Check LW."""
+    await utils.init_dut(dut)
+
+    # lw x1, x2, 0x4
+    dut.u_mem_instr.mem[0].value = 0x83
+    dut.u_mem_instr.mem[1].value = 0x20
+    dut.u_mem_instr.mem[2].value = 0x41
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    dut.u_mem_control.u_mem_data.mem_01[0].value = 0xbeef
+    dut.u_mem_control.u_mem_data.mem_23[0].value = 0xdead
+    dut.u_mem_control.u_mem_data.mem_01[1].value = 0xef01
+    dut.u_mem_control.u_mem_data.mem_23[1].value = 0xabcd
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+    dut.u_registers.regs[2].value = 0x20000
+
+    await FallingEdge(dut.clk_i)
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x20000, 0]
+
+    retries = 5
+    while dut.pc.value == 0x10000 and retries > 0:
+        retries -= 1
+        await FallingEdge(dut.clk_i)
+
+    assert dut.pc.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0x20000, 0xabcdef01]
+
+
+@cocotb.test()
 async def test_addi(dut):
     """Check ADDI."""
     await init_dut(dut)
