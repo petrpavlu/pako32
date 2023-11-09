@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 CC = clang
-CFLAGS = --target=riscv32-unknown-elf -march=rv32i -nostdlib -Wall -pedantic
+CFLAGS = --target=riscv32-unknown-elf -march=rv32i -Oz -nostdlib -Wall -pedantic
 LDFLAGS = -T calc.lds
 
 .PHONY: all
