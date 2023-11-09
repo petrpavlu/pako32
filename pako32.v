@@ -68,34 +68,27 @@ module pako32
                          .clk_div4_o(clk_4mhz),
                          .clk_div2_o(clk_8mhz));
 
-  reg [1:0]        rstn_sync;
-
-  wire             rstn;
+  logic [1:0] rstn_sync;
+  logic       rstn;
 
   assign rstn = rstn_sync[0];
 
   always @(posedge clk_1mhz or negedge lock) begin
-    if (~lock) begin
+    if (~lock)
       rstn_sync <= 2'd0;
-    end else begin
+    else
       rstn_sync <= {1'b1, rstn_sync[1]};
-    end
   end
 
   reg [20:0]       up_cnt;
-  reg [1:0]        sleep_sq;
-
-  wire             sleep;
 
   always @(posedge clk_1mhz or negedge rstn) begin
-    if (~rstn) begin
+    if (~rstn)
       up_cnt <= 'd0;
-      sleep_sq <= 2'b00;
-    end else begin
-      sleep_sq <= {sleep, sleep_sq[1]};
+    else begin
       if (up_cnt[20] == 1'b0)
         up_cnt <= up_cnt + 1;
-      else if (~sleep_sq[0])
+      else
         up_cnt <= 21'hE0000;
     end
   end
@@ -104,7 +97,6 @@ module pako32
 
   cpu u_cpu (.clk_i(clk_2mhz),
              .rstn_i(rstn),
-             .sleep_o(sleep),
              .out_data_i(out_data),
              .out_valid_i(out_valid),
              .in_ready_i(in_ready),
