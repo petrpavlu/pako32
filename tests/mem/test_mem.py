@@ -32,9 +32,11 @@ async def test_write_32B(dut):
         await FallingEdge(dut.clk_i)
         dut.wr_en_i.value = 0
 
+        dut.r_en_i.value = 1
         dut.addr_r_i.value = i
         await FallingEdge(dut.clk_i)
         assert dut.data_r_o.value == 0x12345678
+        dut.r_en_i.value = 0
 
 
 @cocotb.test()
@@ -47,5 +49,3 @@ async def test_write_without_en(dut):
     dut.data_w_i.value = 0xa
     await FallingEdge(dut.clk_i)
     assert dut.data_r_o.value != 0xa 
-
-
