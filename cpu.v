@@ -76,7 +76,7 @@ module cpu
   logic [2:0]  pc_next_sel;
   logic [31:0] mem_data_r;
   logic [31:0] bus_data;
-  logic        reg_wr_en, mem_wr_en;
+  logic        reg_wr_en, mem_wr_en, mem_r_en;
   logic [4:0]  rd_idx, rs1_idx, rs2_idx;
   logic [31:0] rs1_data, rs2_data, imm_data;
   logic [3:0]  alu_op;
@@ -124,6 +124,7 @@ module cpu
     .rstn_i(rstn),
 
     .sext_i(mem_r_sext),
+    .r_en_i(mem_r_en),
     .acc_r_i(mem_acc_r),
     .addr_r_i(alu_res),
     .data_r_o(mem_data_r),
@@ -158,6 +159,7 @@ module cpu
     .mem_wr_ready_i(mem_wr_ready),
     .mem_wr_en_o(mem_wr_en),
     .mem_r_sext_o(mem_r_sext),
+    .mem_r_en_o(mem_r_en),
     .mem_acc_r_o(mem_acc_r),
     .mem_acc_w_o(mem_acc_w)
   );

@@ -10,6 +10,7 @@ module mem_control
 
     // read port
     input  logic        sext_i,
+    input  logic        r_en_i,
     input  logic [1:0]  acc_r_i,
     input  logic [31:0] addr_r_i,
     output logic [31:0] data_r_o,
@@ -73,7 +74,7 @@ module mem_control
         default: data_w = data_w_i; // MEM_ACCESS_WORD
       endcase
     end
-    else begin
+    else if (r_en_i) begin
       // reading
       addr_r = (addr_r_i & 'hfffffffc) - MAP_ZERO;
 
@@ -108,6 +109,7 @@ module mem_control
 
   mem_data u_mem_data(
     .clk_i(clk_i),
+    .r_en_i(r_en_i),
     .addr_r_i(addr_r),
     .data_r_o(data_r),
     .wr_en_i(wr_en),
