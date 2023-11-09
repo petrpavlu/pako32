@@ -49,12 +49,19 @@ module cpu
   logic        mem_wr_ready;
   logic        mem_r_sext;
 
-  mem_instr #(
-    .PROG_FILE("examples/calc/calc.text.txt")
+  mem_control #(
+    .DATA_FILE_01("examples/calc/calc.text.txt01"),
+    .DATA_FILE_23("examples/calc/calc.text.txt23"),
+    .MAP_ZERO(`MEM_INSTR_ZERO)
   ) u_mem_instr (
     .clk_i(clk_i),
-    .pc_i(pc_next),
-    .pc_data_o(pc_data)
+    .rstn_i(rstn),
+
+    .sext_i('b0),
+    .r_en_i('b1),
+    .acc_r_i(2'(`MEM_ACCESS_WORD)),
+    .addr_r_i(pc_next),
+    .data_r_o(pc_data)
   );
 
   registers u_registers (
