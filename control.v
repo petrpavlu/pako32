@@ -31,15 +31,17 @@ module control
   );
 
   localparam [2:0] ST_RESET = 'd0,
-                   ST_EXEC = 'd1;
+                   ST_EXEC = 'd1,
+                   ST_READ_STALL = 'd2;
 
   logic [2:0] state;
+  logic [2:0] state_next;
 
   always_ff @(posedge clk_i or negedge rstn_i) begin
     if (~rstn_i)
       state <= ST_RESET;
     else
-      state <= ST_EXEC;
+      state <= state_next;
   end
 
   always_comb begin
@@ -55,8 +57,14 @@ module control
     pc_isize_o = 4;
     pc_next_off_o = 0;
     pc_next_sel_o = `PC_NEXT_SEL_STALL;
+    mem_wr_en_o = 0;
+    mem_r_sext_o = 0;
+    mem_acc_r_o = `MEM_ACCESS_BYTE;
+    mem_acc_w_o = `MEM_ACCESS_BYTE;
 
-    if (state == ST_EXEC) begin
+    state_next = ST_EXEC;
+
+    if (state > ST_RESET) begin
       pc_next_sel_o = `PC_NEXT_SEL_NEXT;
 
       case (pc_data_i[6:0])
@@ -121,6 +129,16 @@ module control
               pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
             end
           endcase
+        end
+        7'b0000011: begin // LW{B,H,W}
+          reg_wr_en_o = 1;
+          imm_data_o = signed'(pc_data_i[31:20]);
+          alu_b_sel_o = `ALU_B_SEL_IMM;
+          rd_sel_o = `RD_SEL_MEM;
+          pc_next_sel_o = state == ST_READ_STALL ? `PC_NEXT_SEL_NEXT : `PC_NEXT_SEL_STALL;
+          mem_acc_r_o = pc_data_i[14:12];
+
+          state_next = state == ST_READ_STALL ? ST_EXEC : ST_READ_STALL;
         end
         7'b0010011: begin // I-type
           case (pc_data_i[14:12])
@@ -263,6 +281,6 @@ module control
           endcase
         end
       endcase
-    end
+    end // state
   end
 endmodule
