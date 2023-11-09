@@ -119,7 +119,8 @@ module cpu
   logic [2:0]  pc_isize;
   logic [31:0] pc_next_off;
   logic [2:0]  pc_next_sel;
-  logic [31:0] mem_data;
+  logic [31:0] mem_data_r;
+  logic [31:0] bus_data;
   logic        reg_wr_en, mem_wr_en;
   logic [4:0]  rd_idx, rs1_idx, rs2_idx;
   logic [31:0] rs1_data, rs2_data, imm_data;
@@ -170,7 +171,7 @@ module cpu
     .sext_i(mem_r_sext),
     .acc_r_i(mem_acc_r),
     .addr_r_i(alu_res),
-    .data_r_o(mem_data),
+    .data_r_o(mem_data_r),
 
     .wr_en_i(mem_wr_en),
     .acc_w_i(mem_acc_w),
@@ -206,7 +207,8 @@ module cpu
     .mem_acc_w_o(mem_acc_w)
   );
 
-  assign rd_data_mx = rd_sel == `RD_SEL_ALU ? alu_res : 0; // XXX 0 should be memory
+  assign bus_data = mem_data_r; // XXX add OR when IO implemented
+  assign rd_data_mx = rd_sel == `RD_SEL_ALU ? alu_res : bus_data;
   assign alu_a_mx = alu_a_sel == `ALU_A_SEL_RS1 ? rs1_data : pc;
   assign alu_b_mx = alu_b_sel == `ALU_B_SEL_RS2 ? rs2_data : imm_data;
   always_comb begin
@@ -220,9 +222,11 @@ module cpu
   end
 
   always_ff @(posedge clk_i or negedge rstn) begin
-    if (~rstn)
+    if (~rstn) begin
       pc <= `MEM_INSTR_ZERO;
-    else
+    end
+    else begin
       pc <= pc_next;
+    end
   end
 endmodule
