@@ -7,10 +7,17 @@ from cocotb.triggers import ClockCycles, FallingEdge
 import utils
 
 
+async def init_dut(dut):
+    await utils.init_dut(dut)
+
+    for i in range(32):
+        dut.u_mem_instr.mem[i].value = 0
+
+
 @cocotb.test()
 async def test_lui(dut):
     """Check LUI."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # lui x1, 0xabcde
     dut.u_mem_instr.mem[0].value = 0xb7
@@ -40,7 +47,7 @@ async def test_lui(dut):
 @cocotb.test()
 async def test_luilui(dut):
     """Check LUI, followed by another LUI."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # lui x1, 0xabcde
     dut.u_mem_instr.mem[0].value = 0xb7
@@ -82,7 +89,7 @@ async def test_luilui(dut):
 @cocotb.test()
 async def test_auipc(dut):
     """Check AUIPC."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # auipc x1, 0xabcde
     dut.u_mem_instr.mem[0].value = 0x97
@@ -112,7 +119,7 @@ async def test_auipc(dut):
 @cocotb.test()
 async def test_jal(dut):
     """Check JAL."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # jal x1, 0x10
     dut.u_mem_instr.mem[0].value = 0xef
@@ -142,7 +149,7 @@ async def test_jal(dut):
 @cocotb.test()
 async def test_jalr(dut):
     """Check JALR."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # jalr x1, x2, 0x10
     dut.u_mem_instr.mem[0].value = 0xe7
@@ -171,9 +178,55 @@ async def test_jalr(dut):
 
 
 @cocotb.test()
+async def test_beq(dut):
+    """Check BEQ."""
+    await init_dut(dut)
+
+    # beq x1, x2, 0x10
+    dut.u_mem_instr.mem[0].value = 0x63
+    dut.u_mem_instr.mem[1].value = 0x88
+    dut.u_mem_instr.mem[2].value = 0x20
+    dut.u_mem_instr.mem[3].value = 0x00
+
+    # beq x3, x4, 0x10
+    dut.u_mem_instr.mem[4].value = 0x63
+    dut.u_mem_instr.mem[5].value = 0x88
+    dut.u_mem_instr.mem[6].value = 0x41
+    dut.u_mem_instr.mem[7].value = 0x00
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x10
+    dut.u_registers.regs[2].value = 0x11
+    dut.u_registers.regs[3].value = 0x20
+    dut.u_registers.regs[4].value = 0x20
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0x20, 0x11, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0x10014
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0x20, 0x11, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10014
+    assert dut.pc_next.value == 0x10018
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0x20, 0x11, 0x10]
+
+
+@cocotb.test()
 async def test_addi(dut):
     """Check ADDI."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # addi x1, x1, -2048
     dut.u_mem_instr.mem[0].value = 0x93
@@ -204,7 +257,7 @@ async def test_addi(dut):
 @cocotb.test()
 async def test_slti(dut):
     """Check SLTI."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # slti x1, x0, -2048
     dut.u_mem_instr.mem[0].value = 0x93
@@ -248,7 +301,7 @@ async def test_slti(dut):
 @cocotb.test()
 async def test_sltiu(dut):
     """Check SLTIU."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # sltiu x1, x0, -2048
     dut.u_mem_instr.mem[0].value = 0x93
@@ -292,7 +345,7 @@ async def test_sltiu(dut):
 @cocotb.test()
 async def test_xori(dut):
     """Check XORI."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # xori x1, x1, -(0x1000-0xabc)
     dut.u_mem_instr.mem[0].value = 0x93
@@ -323,7 +376,7 @@ async def test_xori(dut):
 @cocotb.test()
 async def test_ori(dut):
     """Check ORI."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # ori x1, x1, -(0x1000-0xabc)
     dut.u_mem_instr.mem[0].value = 0x93
@@ -354,7 +407,7 @@ async def test_ori(dut):
 @cocotb.test()
 async def test_andi(dut):
     """Check ANDI."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # andi x1, x1, -(0x1000-0xabc)
     dut.u_mem_instr.mem[0].value = 0x93
@@ -385,7 +438,7 @@ async def test_andi(dut):
 @cocotb.test()
 async def test_slli(dut):
     """Check SLLI."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # slli x1, x1, 4
     dut.u_mem_instr.mem[0].value = 0x93
@@ -416,7 +469,7 @@ async def test_slli(dut):
 @cocotb.test()
 async def test_srli(dut):
     """Check SRLI."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # srli x1, x1, 4
     dut.u_mem_instr.mem[0].value = 0x93
@@ -447,7 +500,7 @@ async def test_srli(dut):
 @cocotb.test()
 async def test_srai(dut):
     """Check SRAI."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # srai x1, x1, 4
     dut.u_mem_instr.mem[0].value = 0x93
@@ -478,7 +531,7 @@ async def test_srai(dut):
 @cocotb.test()
 async def test_add(dut):
     """Check ADD."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # add x1, x1, x2
     dut.u_mem_instr.mem[0].value = 0xb3
@@ -510,7 +563,7 @@ async def test_add(dut):
 @cocotb.test()
 async def test_sub(dut):
     """Check SUB."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # sub x1, x1, x2
     dut.u_mem_instr.mem[0].value = 0xb3
@@ -542,7 +595,7 @@ async def test_sub(dut):
 @cocotb.test()
 async def test_sll(dut):
     """Check SLL."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # sll x1, x1, x2
     dut.u_mem_instr.mem[0].value = 0xb3
@@ -574,7 +627,7 @@ async def test_sll(dut):
 @cocotb.test()
 async def test_slt(dut):
     """Check SLT."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # slt x1, x0, x1
     dut.u_mem_instr.mem[0].value = 0xb3
@@ -618,7 +671,7 @@ async def test_slt(dut):
 @cocotb.test()
 async def test_sltu(dut):
     """Check SLTU."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # sltu x1, x0, x1
     dut.u_mem_instr.mem[0].value = 0xb3
@@ -662,7 +715,7 @@ async def test_sltu(dut):
 @cocotb.test()
 async def test_xor(dut):
     """Check XOR."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # xor x1, x1, x2
     dut.u_mem_instr.mem[0].value = 0xb3
@@ -695,7 +748,7 @@ async def test_xor(dut):
 @cocotb.test()
 async def test_srl(dut):
     """Check SRL."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # srl x1, x1, x2
     dut.u_mem_instr.mem[0].value = 0xb3
@@ -727,7 +780,7 @@ async def test_srl(dut):
 @cocotb.test()
 async def test_sra(dut):
     """Check SRA."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # srai x1, x1, x2
     dut.u_mem_instr.mem[0].value = 0xb3
@@ -759,7 +812,7 @@ async def test_sra(dut):
 @cocotb.test()
 async def test_or(dut):
     """Check OR."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # or x1, x1, x2
     dut.u_mem_instr.mem[0].value = 0xb3
@@ -791,7 +844,7 @@ async def test_or(dut):
 @cocotb.test()
 async def test_and(dut):
     """Check AND."""
-    await utils.init_dut(dut)
+    await init_dut(dut)
 
     # and x1, x1, x2
     dut.u_mem_instr.mem[0].value = 0xb3

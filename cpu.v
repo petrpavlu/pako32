@@ -116,8 +116,9 @@ module cpu
   logic [31:0] pc;
   logic [31:0] pc_next;
   logic [31:0] pc_data;
+  logic [2:0]  pc_isize;
   logic [31:0] pc_next_off;
-  logic [1:0]  pc_next_sel;
+  logic [2:0]  pc_next_sel;
   logic [31:0] mem_data;
   logic        reg_wr_en, mem_wr_en;
   logic [4:0]  rd_idx, rs1_idx, rs2_idx;
@@ -191,6 +192,8 @@ module cpu
     .alu_a_sel_o(alu_a_sel),
     .alu_b_sel_o(alu_b_sel),
     .rd_sel_o(rd_sel),
+
+    .pc_isize_o(pc_isize),
     .pc_next_off_o(pc_next_off),
     .pc_next_sel_o(pc_next_sel),
 
@@ -206,8 +209,10 @@ module cpu
   assign alu_b_mx = alu_b_sel == `ALU_B_SEL_RS2 ? rs2_data : imm_data;
   always_comb begin
     case (pc_next_sel)
+      `PC_NEXT_SEL_NEXT: pc_next = pc + pc_isize;
       `PC_NEXT_SEL_PC_IMM: pc_next = pc + pc_next_off;
       `PC_NEXT_SEL_RS1_IMM: pc_next = rs1_data + pc_next_off;
+      `PC_NEXT_SEL_COND_PC_IMM: pc_next = alu_res ? pc + pc_next_off : pc + pc_isize;
       default: pc_next = pc; // PC_NEXT_SEL_STALL
     endcase
   end
