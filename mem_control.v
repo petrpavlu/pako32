@@ -115,11 +115,11 @@ module mem_control
       state <= ST_READY;
   end
 
-  mem_data #(
+  mem #(
     .DATA_FILE_01(DATA_FILE_01),
     .DATA_FILE_23(DATA_FILE_23),
     .ROWS(ROWS)
-  ) u_mem_data (
+  ) u_mem (
     .clk_i(clk_i),
     .r_en_i(r_en),
     .addr_r_i(addr_r),

@@ -3,7 +3,7 @@
 
 `include "const.v"
 
-module mem_data
+module mem
   #(
     // Datafiles contain 16b values
     parameter DATA_FILE_01 = "",

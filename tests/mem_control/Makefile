@@ -3,8 +3,8 @@
 
 # Configuration for cocotb.
 VERILOG_SOURCES = \
-	../../mem_control.v \
-	../../mem_data.v
+	../../mem.v \
+	../../mem_control.v
 TOPLEVEL = mem_control
 MODULE = test_mem_control
 
