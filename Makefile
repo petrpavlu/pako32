@@ -59,3 +59,7 @@ check:
 clean:
 	$(MAKE) -C tests clean
 	rm -f abc.history $(PROJ).json $(PROJ).asc $(PROJ).rpt $(PROJ).bin
+
+testmem:
+	yosys -p 'read_verilog -sv $(MEM)' -p 'synth_ice40; write_verilog' | tee $(MEM).v | grep " SB_RAM40_4K "
+
