@@ -161,7 +161,9 @@ module cpu
     .res(alu_res)
   );
 
-  mem_control u_mem_control(
+  mem_control #(
+    .MAP_ZERO(`MEM_DATA_ZERO)
+  ) u_mem_control (
     .clk_i(clk_i),
     .rstn_i(rstn),
 

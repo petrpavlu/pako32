@@ -22,6 +22,8 @@ module mem_control
     output logic        wr_ready_o
   );
 
+  parameter MAP_ZERO = 0;
+
   localparam [1:0] ST_RESET = 'd0,
                    ST_READY = 'd1,
                    ST_WRITE_PENDING = 'd2;
@@ -51,7 +53,7 @@ module mem_control
     else if (state == ST_WRITE_PENDING) begin
       // writing -- store of the updated data
       wr_en = 1;
-      addr_w = addr_w_i & 'hfffffffc;
+      addr_w = (addr_w_i & 'hfffffffc) - MAP_ZERO;
 
       case (acc_w_i)
         `MEM_ACCESS_BYTE: begin
@@ -73,7 +75,7 @@ module mem_control
     end
     else begin
       // reading
-      addr_r = addr_r_i & 'hfffffffc;
+      addr_r = (addr_r_i & 'hfffffffc) - MAP_ZERO;
 
       case (acc_r_i)
         `MEM_ACCESS_BYTE: data_r_o = signed'(8'(data_r >> (8 * (addr_r_i & 3))));
