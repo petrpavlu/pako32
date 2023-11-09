@@ -80,6 +80,8 @@ module cpu
   );
 
   mem_control #(
+    .DATA_FILE_01("examples/calc/calc.data.txt01"),
+    .DATA_FILE_23("examples/calc/calc.data.txt23"),
     .MAP_ZERO(`MEM_DATA_ZERO)
   ) u_mem_control (
     .clk_i(clk_i),

@@ -4,6 +4,13 @@
 `include "const.v"
 
 module mem_control
+  #(
+    // Datafiles contain 16b values
+    parameter DATA_FILE_01 = "",
+    parameter DATA_FILE_23 = "",
+    parameter ROWS         = 512,
+    parameter MAP_ZERO     = 0
+  )
   (
     input logic clk_i,
     input logic rstn_i,
@@ -22,8 +29,6 @@ module mem_control
     input  logic [31:0] data_w_i,
     output logic        wr_ready_o
   );
-
-  parameter MAP_ZERO = 0;
 
   localparam [1:0] ST_RESET = 'd0,
                    ST_READY = 'd1,
@@ -110,7 +115,11 @@ module mem_control
       state <= ST_READY;
   end
 
-  mem_data u_mem_data(
+  mem_data #(
+    .DATA_FILE_01(DATA_FILE_01),
+    .DATA_FILE_23(DATA_FILE_23),
+    .ROWS(ROWS)
+  ) u_mem_data (
     .clk_i(clk_i),
     .r_en_i(r_en),
     .addr_r_i(addr_r),
