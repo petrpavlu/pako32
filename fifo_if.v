@@ -1,4 +1,7 @@
-// TODO Replace, this temporary example is taken from
+// Copyright (C) 2023 Petr Pavlu <petr.pavlu@dagobah.cz>
+// SPDX-License-Identifier: MIT
+
+// Based on
 // https://github.com/ulixxe/usb_cdc/blob/main/examples/common/hdl/fifo_if.v.
 
 // FIFO_IF module shall implement an interface for MCUs to USB_CDC FIFO.

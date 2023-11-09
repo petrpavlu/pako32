@@ -1,38 +1,39 @@
 // Copyright (C) 2023 Petr Pavlu <petr.pavlu@dagobah.cz>
 // SPDX-License-Identifier: MIT
 
-// TODO Replace, this temporary example is taken from
+// Parts based on
 // https://github.com/ulixxe/usb_cdc/blob/main/examples/TinyFPGA-BX/hdl/soc/soc.v.
+
 module pako32
   (
-    input  clk, // 16MHz Clock
-    output led, // User LED ON=1, OFF=0
-    inout  usb_p, // USB+
-    inout  usb_n, // USB-
-    output usb_pu  // USB 1.5kOhm Pullup EN
+    input  logic clk,   // 16MHz Clock
+    output logic led,   // User LED ON=1, OFF=0
+    inout  logic usb_p, // USB+
+    inout  logic usb_n, // USB-
+    output logic usb_pu // USB 1.5kOhm Pullup EN
   );
 
   localparam BIT_SAMPLES = 'd4;
   localparam [6:0] DIVF = 12*BIT_SAMPLES-1;
 
-  wire             clk_pll;
-  wire             clk_1mhz;
-  wire             clk_2mhz;
-  wire             clk_4mhz;
-  wire             clk_8mhz;
-  wire             lock;
-  wire             dp_pu;
-  wire             dp_rx;
-  wire             dn_rx;
-  wire             dp_tx;
-  wire             dn_tx;
-  wire             tx_en;
-  wire [7:0]       out_data;
-  wire             out_valid;
-  wire             in_ready;
-  wire [7:0]       in_data;
-  wire             in_valid;
-  wire             out_ready;
+  logic       clk_pll;
+  logic       clk_1mhz;
+  logic       clk_2mhz;
+  logic       clk_4mhz;
+  logic       clk_8mhz;
+  logic       lock;
+  logic       dp_pu;
+  logic       dp_rx;
+  logic       dn_rx;
+  logic       dp_tx;
+  logic       dn_tx;
+  logic       tx_en;
+  logic [7:0] out_data;
+  logic       out_valid;
+  logic       in_ready;
+  logic [7:0] in_data;
+  logic       in_valid;
+  logic       out_ready;
 
   // if FEEDBACK_PATH = SIMPLE:
   // clk_freq = (ref_freq * (DIVF + 1)) / (2**DIVQ * (DIVR + 1));
@@ -80,7 +81,7 @@ module pako32
       rstn_sync <= {1'b1, rstn_sync[1]};
   end
 
-  reg [20:0]       up_cnt;
+  logic [20:0] up_cnt;
 
   always @(posedge clk_1mhz or negedge rstn) begin
     if (~rstn)

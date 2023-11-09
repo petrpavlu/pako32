@@ -5,16 +5,16 @@
 
 module cpu
   (
-    input        clk_i,
-    input        rstn_i,
+    input logic clk_i,
+    input logic rstn_i,
 
     // to/from USB_CDC
-    output [7:0] in_data_o,
-    output       in_valid_o,
-    input        in_ready_i,
-    input [7:0]  out_data_i,
-    input        out_valid_i,
-    output       out_ready_o
+    output logic [7:0] in_data_o,
+    output logic       in_valid_o,
+    input  logic       in_ready_i,
+    input  logic [7:0] out_data_i,
+    input  logic       out_valid_i,
+    output logic       out_ready_o
   );
 
   logic [1:0] rstn_sync;
