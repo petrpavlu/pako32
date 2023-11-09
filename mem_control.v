@@ -78,11 +78,20 @@ module mem_control
       addr_r = (addr_r_i & 'hfffffffc) - MAP_ZERO;
 
       case (acc_r_i)
-        `MEM_ACCESS_BYTE: data_r_o = signed'(8'(data_r >> (8 * (addr_r_i & 3))));
-        `MEM_ACCESS_HALFWORD: data_r_o = signed'(16'(data_r >> (8 * (addr_r_i & 2))));
-        default: data_r_o = data_r; // MEM_ACCESS_WORD
+        `MEM_ACCESS_BYTE: begin
+          if (sext_i == 1)
+            data_r_o =   signed'(8'(data_r >> (8 * (addr_r_i & 3))));
+          else
+            data_r_o = unsigned'(8'(data_r >> (8 * (addr_r_i & 3))));
+        end
+        `MEM_ACCESS_HALFWORD: begin
+          if (sext_i == 1)
+             data_r_o =   signed'(16'(data_r >> (8 * (addr_r_i & 2))));
+           else
+             data_r_o = unsigned'(16'(data_r >> (8 * (addr_r_i & 2))));
+        end
+        default:              data_r_o = data_r; // MEM_ACCESS_WORD
       endcase
-      // TODO implement sext_i
     end
   end
 
