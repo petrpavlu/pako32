@@ -88,46 +88,46 @@ module control
           alu_a_sel_o = `ALU_A_SEL_PC;
           alu_b_sel_o = `ALU_B_SEL_IMM;
           pc_next_sel_o = `PC_NEXT_SEL_PC_IMM;
-          pc_next_off_o = {pc_data_i[31], pc_data_i[19:12], pc_data_i[20], pc_data_i[30:21], 1'b0};
+          pc_next_off_o = signed'({pc_data_i[31], pc_data_i[19:12], pc_data_i[20], pc_data_i[30:21], 1'b0});
         end
         7'b1100111: begin // JALR
           reg_wr_en_o = 1;
           imm_data_o = 4;
           alu_a_sel_o = `ALU_A_SEL_PC;
           alu_b_sel_o = `ALU_B_SEL_IMM;
-          pc_next_off_o = pc_data_i[31:20];
+          pc_next_off_o = signed'(pc_data_i[31:20]);
           pc_next_sel_o = `PC_NEXT_SEL_RS1_IMM;
         end
         7'b1100011: begin // B-type
           case (pc_data_i[14:12])
             3'b000: begin // BEQ
               alu_op_o = `ALU_OP_EQ;
-              pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
+              pc_next_off_o = signed'({pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0});
               pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
             end
             3'b001: begin // BNE
               alu_op_o = `ALU_OP_NE;
-              pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
+              pc_next_off_o = signed'({pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0});
               pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
             end
             3'b100: begin // BLT
               alu_op_o = `ALU_OP_LT;
-              pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
+              pc_next_off_o = signed'({pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0});
               pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
             end
             3'b101: begin // BGE
               alu_op_o = `ALU_OP_GE;
-              pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
+              pc_next_off_o = signed'({pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0});
               pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
             end
             3'b110: begin // BLTU
               alu_op_o = `ALU_OP_LTU;
-              pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
+              pc_next_off_o = signed'({pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0});
               pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
             end
             3'b111: begin // BGEU
               alu_op_o = `ALU_OP_GEU;
-              pc_next_off_o = {pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0};
+              pc_next_off_o = signed'({pc_data_i[31], pc_data_i[7], pc_data_i[30:25], pc_data_i[11:8], 1'b0});
               pc_next_sel_o = `PC_NEXT_SEL_COND_PC_IMM;
             end
           endcase

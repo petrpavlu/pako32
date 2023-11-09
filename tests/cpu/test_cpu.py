@@ -224,6 +224,52 @@ async def test_beq(dut):
 
 
 @cocotb.test()
+async def test_beq_neg(dut):
+    """Check BEQ with negative offset (sign extension)."""
+    await init_dut(dut)
+
+    # beq x1, x2, -0x10
+    dut.u_mem_instr.mem[0].value = 0xe3
+    dut.u_mem_instr.mem[1].value = 0x88
+    dut.u_mem_instr.mem[2].value = 0x20
+    dut.u_mem_instr.mem[3].value = 0xfe
+
+    # beq x3, x4, -0x10
+    dut.u_mem_instr.mem[4].value = 0xe3
+    dut.u_mem_instr.mem[5].value = 0x88
+    dut.u_mem_instr.mem[6].value = 0x41
+    dut.u_mem_instr.mem[7].value = 0xfe
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+
+    dut.u_registers.regs[1].value = 0x10
+    dut.u_registers.regs[2].value = 0x11
+    dut.u_registers.regs[3].value = 0x20
+    dut.u_registers.regs[4].value = 0x20
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10000
+    assert dut.pc_next.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0x20, 0x11, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0x10004
+    assert dut.pc_next.value == 0xfff4
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0x20, 0x11, 0x10]
+
+    await FallingEdge(dut.clk_i)
+    assert dut.pc.value == 0xfff4
+    assert dut.pc_next.value == 0xfff8
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 27 * [0] + [0x20, 0x20, 0x11, 0x10]
+
+
+@cocotb.test()
 async def test_bne(dut):
     """Check BNE."""
     await init_dut(dut)
