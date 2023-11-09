@@ -30,43 +30,6 @@ module cpu
     end
   end
 
-  // USB FIFO
-  logic       fifo_sel;
-  logic       fifo_rd, fifo_wr;
-  logic [1:0] fifo_addr;
-  logic [7:0] fifo_wrdata;
-  logic [7:0] fifo_rddata;
-  logic       fifo_out_irq, fifo_in_irq;
-
-  always_comb begin
-    // dummy values, always zero
-    fifo_sel = 1'b0;
-    fifo_rd = 1'b0;
-    fifo_wr = 1'b0;
-    fifo_addr = 2'b00;
-    fifo_wrdata = 8'd0;
-    // unused: fifo_rddata = 8'd0; // TODO
-    // unused: fifo_in_irq
-    // unised: fifo_out_irq
- end
-
- fifo_if u_fifo_if (.clk_i(clk_i),
-                    .rstn_i(rstn),
-                    .sel_i(fifo_sel),
-                    .read_i(fifo_rd),
-                    .write_i(fifo_wr),
-                    .addr_i(fifo_addr),
-                    .data_i(fifo_wrdata),
-                    .data_o(cpu_rddata),
-                    .in_irq_o(fifo_in_irq),
-                    .out_irq_o(fifo_out_irq),
-                    .in_data_o(in_data_o),
-                    .in_valid_o(in_valid_o),
-                    .in_ready_i(in_ready_i),
-                    .out_data_i(out_data_i),
-                    .out_valid_i(out_valid_i),
-                    .out_ready_o(out_ready_o));
-
   // CPU logic
   logic [31:0] pc;
   logic [31:0] pc_next;
@@ -164,7 +127,7 @@ module cpu
     .mem_acc_w_o(mem_acc_w)
   );
 
-  assign bus_data = mem_data_r; // XXX add OR when IO implemented
+  assign bus_data = mem_data_r | fifo_rddata;
   assign rd_data_mx = rd_sel == `RD_SEL_ALU ? alu_res : bus_data;
   assign alu_a_mx = alu_a_sel == `ALU_A_SEL_RS1 ? rs1_data : pc;
   assign alu_b_mx = alu_b_sel == `ALU_B_SEL_RS2 ? rs2_data : imm_data;
@@ -186,4 +149,39 @@ module cpu
       pc <= pc_next;
     end
   end
+
+  // USB FIFO
+  logic       fifo_sel;
+  logic       fifo_rd, fifo_wr;
+  logic [1:0] fifo_addr;
+  logic [7:0] fifo_wrdata;
+  logic [7:0] fifo_rddata;
+  logic       fifo_out_irq, fifo_in_irq; // unused
+
+  always_comb begin
+    fifo_sel = (mem_r_en || mem_wr_en) && alu_res >= `MEM_USB_IO_ZERO &&
+      alu_res < `MEM_USB_IO_ZERO + 4;
+    fifo_sel = mem_r_en || mem_wr_en;
+    fifo_rd = fifo_sel && mem_r_en;
+    fifo_wr = fifo_sel && mem_wr_en;
+    fifo_addr = 2'(alu_res - `MEM_USB_IO_ZERO);
+    fifo_wrdata = rs2_data;
+  end
+
+  fifo_if u_fifo_if (.clk_i(clk_i),
+                     .rstn_i(rstn),
+                     .sel_i(fifo_sel),
+                     .read_i(fifo_rd),
+                     .write_i(fifo_wr),
+                     .addr_i(fifo_addr),
+                     .data_i(fifo_wrdata),
+                     .data_o(fifo_rddata),
+                     .in_irq_o(fifo_in_irq),
+                     .out_irq_o(fifo_out_irq),
+                     .in_data_o(in_data_o),
+                     .in_valid_o(in_valid_o),
+                     .in_ready_i(in_ready_i),
+                     .out_data_i(out_data_i),
+                     .out_valid_i(out_valid_i),
+                     .out_ready_o(out_ready_o));
 endmodule

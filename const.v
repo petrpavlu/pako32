@@ -33,6 +33,7 @@
 
 `define MEM_INSTR_ZERO 'h10000
 `define MEM_DATA_ZERO 'h20000
+`define MEM_USB_IO_ZERO 'h30000
 
 `define MEM_ACCESS_BYTE 0
 `define MEM_ACCESS_HALFWORD 1
