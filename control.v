@@ -130,13 +130,14 @@ module control
             end
           endcase
         end
-        7'b0000011: begin // LW{B,H,W}
+        7'b0000011: begin // LW{B,H,W,BU,HU}
           reg_wr_en_o = 1;
           imm_data_o = signed'(pc_data_i[31:20]);
           alu_b_sel_o = `ALU_B_SEL_IMM;
           rd_sel_o = `RD_SEL_MEM;
           pc_next_sel_o = state == ST_EXEC ? `PC_NEXT_SEL_STALL : `PC_NEXT_SEL_NEXT;
-          mem_acc_r_o = pc_data_i[14:12];
+          mem_r_sext_o = ~pc_data_i[14];
+          mem_acc_r_o = pc_data_i[13:12];
 
           state_next = state == ST_READ_STALL ? ST_EXEC : ST_READ_STALL;
         end
