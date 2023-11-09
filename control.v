@@ -45,9 +45,9 @@ module control
   always_comb begin
     reg_wr_en_o = 0;
     rd_idx_o = pc_data_i[11:7];
-    imm_data_o = 0;
     rs1_idx_o = pc_data_i[19:15];
     rs2_idx_o = pc_data_i[24:20];
+    imm_data_o = 0;
     alu_op_o = `ALU_OP_ADD;
     alu_a_sel_o = `ALU_A_SEL_RS1;
     alu_b_sel_o = `ALU_B_SEL_RS2;
