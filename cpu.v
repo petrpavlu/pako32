@@ -23,11 +23,10 @@ module cpu
   assign rstn = rstn_sync[0];
 
   always @(posedge clk_i or negedge rstn_i) begin
-    if (~rstn_i) begin
+    if (~rstn_i)
       rstn_sync <= 2'd0;
-    end else begin
+    else
       rstn_sync <= {1'b1, rstn_sync[1]};
-    end
   end
 
   // CPU logic
@@ -142,12 +141,10 @@ module cpu
   end
 
   always_ff @(posedge clk_i or negedge rstn) begin
-    if (~rstn) begin
+    if (~rstn)
       pc <= `MEM_INSTR_ZERO;
-    end
-    else begin
+    else
       pc <= pc_next;
-    end
   end
 
   // USB FIFO

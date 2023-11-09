@@ -4,6 +4,12 @@
 `include "const.v"
 
 module mem_data
+  #(
+    // Datafiles contain 16b values
+    parameter DATA_FILE_01 = "",
+    parameter DATA_FILE_23 = "",
+    parameter ROWS         = 512
+  )
   (
     input logic clk_i,
     // read port
@@ -16,11 +22,6 @@ module mem_data
     input  logic [31:0] addr_w_i,
     input  logic [31:0] data_w_i
   );
-
-  // Datafiles contain 16b values
-  parameter DATA_FILE_01 = "";
-  parameter DATA_FILE_23 = "";
-  parameter ROWS      = 512;
 
   logic [15:0] mem_01 [ROWS-1:0];
   logic [15:0] mem_23 [ROWS-1:0];
