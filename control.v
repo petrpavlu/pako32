@@ -28,12 +28,14 @@ module control
     output  logic mem_wr_en_o,
     output  logic mem_r_sext_o,
     output  logic mem_r_en_o,
-    output  logic [1:0] mem_acc_r_o, mem_acc_w_o
+    output  logic [1:0] mem_acc_r_o,
+    output  logic [1:0] mem_acc_w_o
   );
 
   localparam [2:0] ST_RESET = 'd0,
                    ST_EXEC = 'd1,
-                   ST_READ_STALL = 'd2;
+                   ST_READ_STALL = 'd2,
+                   ST_WRITE_STALL = 'd3;
 
   logic [2:0] state;
   logic [2:0] state_next;
@@ -143,6 +145,15 @@ module control
           mem_acc_r_o = pc_data_i[13:12];
 
           state_next = state == ST_READ_STALL ? ST_EXEC : ST_READ_STALL;
+        end
+        7'b0100011: begin // S{B,H,W}
+          imm_data_o = signed'({pc_data_i[31:25], pc_data_i[11:7]});
+          alu_b_sel_o = `ALU_B_SEL_IMM;
+          pc_next_sel_o = (state == ST_WRITE_STALL && mem_wr_ready_i == 1)  ? `PC_NEXT_SEL_NEXT : `PC_NEXT_SEL_STALL;
+          mem_wr_en_o = 1;
+          mem_acc_w_o = pc_data_i[13:12];
+
+          state_next = (state == ST_WRITE_STALL && mem_wr_ready_i == 1) ? ST_EXEC : ST_WRITE_STALL;
         end
         7'b0010011: begin // I-type
           case (pc_data_i[14:12])

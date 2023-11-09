@@ -561,6 +561,113 @@ async def test_lhu(dut):
 
 
 @cocotb.test()
+async def test_sb(dut):
+    """Check SB."""
+    await utils.init_dut(dut)
+    await init_instr(dut, 0, 0x002083a3) # sb x2, 0x7(x1)
+
+    dut.u_mem_control.u_mem.mem_01[0].value = 0xbeef
+    dut.u_mem_control.u_mem.mem_23[0].value = 0xdead
+    dut.u_mem_control.u_mem.mem_01[1].value = 0xbeef
+    dut.u_mem_control.u_mem.mem_23[1].value = 0xdead
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+    dut.u_registers.regs[1].value = 0x20000
+    dut.u_registers.regs[2].value = 0xabcdef01
+
+    await FallingEdge(dut.clk_i)
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0xabcdef01, 0x20000]
+
+    retries = 5
+    while dut.pc.value == 0x10000 and retries > 0:
+        retries -= 1
+        await FallingEdge(dut.clk_i)
+
+    assert dut.pc.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0xabcdef01, 0x20000]
+
+    print(dut.u_mem_control.u_mem.mem_01[1].value)
+    print(dut.u_mem_control.u_mem.mem_23[1].value)
+    assert dut.u_mem_control.u_mem.mem_01[1].value == 0xbeef
+    assert dut.u_mem_control.u_mem.mem_23[1].value == 0x01ad
+
+
+@cocotb.test()
+async def test_sh(dut):
+    """Check SH."""
+    await utils.init_dut(dut)
+    await init_instr(dut, 0, 0x00209323) # sh x2, 0x6(x1)
+
+    dut.u_mem_control.u_mem.mem_01[0].value = 0xbeef
+    dut.u_mem_control.u_mem.mem_23[0].value = 0xdead
+    dut.u_mem_control.u_mem.mem_01[1].value = 0xbeef
+    dut.u_mem_control.u_mem.mem_23[1].value = 0xdead
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+    dut.u_registers.regs[1].value = 0x20000
+    dut.u_registers.regs[2].value = 0xabcdef01
+
+    await FallingEdge(dut.clk_i)
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0xabcdef01, 0x20000]
+
+    retries = 5
+    while dut.pc.value == 0x10000 and retries > 0:
+        retries -= 1
+        await FallingEdge(dut.clk_i)
+
+    assert dut.pc.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0xabcdef01, 0x20000]
+
+    assert dut.u_mem_control.u_mem.mem_01[1].value == 0xbeef
+    assert dut.u_mem_control.u_mem.mem_23[1].value == 0xef01
+
+
+@cocotb.test()
+async def test_sw(dut):
+    """Check SW."""
+    await utils.init_dut(dut)
+    await init_instr(dut, 0, 0x0020a223) # sw x2, 0x4(x1)
+
+    dut.u_mem_control.u_mem.mem_01[0].value = 0xbeef
+    dut.u_mem_control.u_mem.mem_23[0].value = 0xdead
+    dut.u_mem_control.u_mem.mem_01[1].value = 0xbeef
+    dut.u_mem_control.u_mem.mem_23[1].value = 0xdead
+
+    await ClockCycles(dut.clk_i, 2, rising=False)
+    assert dut.pc.value == 0x10000
+    assert dut.u_control.state == dut.u_control.ST_RESET.value
+    assert dut.u_registers.regs.value == 31 * [0]
+    dut.u_registers.regs[1].value = 0x20000
+    dut.u_registers.regs[2].value = 0xabcdef01
+
+    await FallingEdge(dut.clk_i)
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0xabcdef01, 0x20000]
+
+    retries = 5
+    while dut.pc.value == 0x10000 and retries > 0:
+        retries -= 1
+        await FallingEdge(dut.clk_i)
+
+    assert dut.pc.value == 0x10004
+    assert dut.u_control.state == dut.u_control.ST_EXEC.value
+    assert dut.u_registers.regs.value == 29 * [0] + [0xabcdef01, 0x20000]
+
+    assert dut.u_mem_control.u_mem.mem_01[1].value == 0xef01
+    assert dut.u_mem_control.u_mem.mem_23[1].value == 0xabcd
+
+
+@cocotb.test()
 async def test_addi(dut):
     """Check ADDI."""
     await init_dut(dut)
