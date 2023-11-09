@@ -10,20 +10,21 @@ import utils
 async def init_dut(dut):
     await utils.init_dut(dut)
 
-    for i in range(32):
-        dut.u_mem_instr.mem[i].value = 0
+    for i in range(8):
+        dut.u_mem_instr.u_mem.mem_01[i].value = 0
+        dut.u_mem_instr.u_mem.mem_23[i].value = 0
+
+
+async def init_instr(dut, offset, instr):
+    dut.u_mem_instr.u_mem.mem_01[offset / 4].value = (instr >> 0) & 0xffff
+    dut.u_mem_instr.u_mem.mem_23[offset / 4].value = (instr >> 16) & 0xffff
 
 
 @cocotb.test()
 async def test_lui(dut):
     """Check LUI."""
     await init_dut(dut)
-
-    # lui x1, 0xabcde
-    dut.u_mem_instr.mem[0].value = 0xb7
-    dut.u_mem_instr.mem[1].value = 0xe0
-    dut.u_mem_instr.mem[2].value = 0xcd
-    dut.u_mem_instr.mem[3].value = 0xab
+    await init_instr(dut, 0, 0xabcde0b7) # lui x1, 0xabcde
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -48,18 +49,8 @@ async def test_lui(dut):
 async def test_luilui(dut):
     """Check LUI, followed by another LUI."""
     await init_dut(dut)
-
-    # lui x1, 0xabcde
-    dut.u_mem_instr.mem[0].value = 0xb7
-    dut.u_mem_instr.mem[1].value = 0xe0
-    dut.u_mem_instr.mem[2].value = 0xcd
-    dut.u_mem_instr.mem[3].value = 0xab
-
-    # lui x1, 0xedcba
-    dut.u_mem_instr.mem[4].value = 0xb7
-    dut.u_mem_instr.mem[5].value = 0xa0
-    dut.u_mem_instr.mem[6].value = 0xcb
-    dut.u_mem_instr.mem[7].value = 0xed
+    await init_instr(dut, 0, 0xabcde0b7) # lui x1, 0xabcde
+    await init_instr(dut, 4, 0xedcba0b7) # lui x1, 0xedcba
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -90,12 +81,7 @@ async def test_luilui(dut):
 async def test_auipc(dut):
     """Check AUIPC."""
     await init_dut(dut)
-
-    # auipc x1, 0xabcde
-    dut.u_mem_instr.mem[0].value = 0x97
-    dut.u_mem_instr.mem[1].value = 0xe0
-    dut.u_mem_instr.mem[2].value = 0xcd
-    dut.u_mem_instr.mem[3].value = 0xab
+    await init_instr(dut, 0, 0xabcde097) # auipc x1, 0xabcde
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -120,12 +106,7 @@ async def test_auipc(dut):
 async def test_jal(dut):
     """Check JAL."""
     await init_dut(dut)
-
-    # jal x1, 0x10
-    dut.u_mem_instr.mem[0].value = 0xef
-    dut.u_mem_instr.mem[1].value = 0x00
-    dut.u_mem_instr.mem[2].value = 0x00
-    dut.u_mem_instr.mem[3].value = 0x01
+    await init_instr(dut, 0, 0x010000ef) # jal x1, 0x10
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -150,12 +131,7 @@ async def test_jal(dut):
 async def test_jalr(dut):
     """Check JALR."""
     await init_dut(dut)
-
-    # jalr x1, x2, 0x10
-    dut.u_mem_instr.mem[0].value = 0xe7
-    dut.u_mem_instr.mem[1].value = 0x00
-    dut.u_mem_instr.mem[2].value = 0x01
-    dut.u_mem_instr.mem[3].value = 0x01
+    await init_instr(dut, 0, 0x010100e7) # jalr x1, x2, 0x10
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -181,18 +157,8 @@ async def test_jalr(dut):
 async def test_beq(dut):
     """Check BEQ."""
     await init_dut(dut)
-
-    # beq x1, x2, 0x10
-    dut.u_mem_instr.mem[0].value = 0x63
-    dut.u_mem_instr.mem[1].value = 0x88
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    # beq x3, x4, 0x10
-    dut.u_mem_instr.mem[4].value = 0x63
-    dut.u_mem_instr.mem[5].value = 0x88
-    dut.u_mem_instr.mem[6].value = 0x41
-    dut.u_mem_instr.mem[7].value = 0x00
+    await init_instr(dut, 0, 0x00208863) # beq x1, x2, 0x10
+    await init_instr(dut, 4, 0x00418863) # beq x3, x4, 0x10
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -227,18 +193,8 @@ async def test_beq(dut):
 async def test_beq_neg(dut):
     """Check BEQ with negative offset (sign extension)."""
     await init_dut(dut)
-
-    # beq x1, x2, -0x10
-    dut.u_mem_instr.mem[0].value = 0xe3
-    dut.u_mem_instr.mem[1].value = 0x88
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0xfe
-
-    # beq x3, x4, -0x10
-    dut.u_mem_instr.mem[4].value = 0xe3
-    dut.u_mem_instr.mem[5].value = 0x88
-    dut.u_mem_instr.mem[6].value = 0x41
-    dut.u_mem_instr.mem[7].value = 0xfe
+    await init_instr(dut, 0, 0xfe2088e3) # beq x1, x2, -0x10
+    await init_instr(dut, 4, 0xfe4188e3) # beq x3, x4, -0x10
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -273,18 +229,8 @@ async def test_beq_neg(dut):
 async def test_bne(dut):
     """Check BNE."""
     await init_dut(dut)
-
-    # bne x1, x2, 0x10
-    dut.u_mem_instr.mem[0].value = 0x63
-    dut.u_mem_instr.mem[1].value = 0x98
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    # bne x3, x4, 0x10
-    dut.u_mem_instr.mem[4].value = 0x63
-    dut.u_mem_instr.mem[5].value = 0x98
-    dut.u_mem_instr.mem[6].value = 0x41
-    dut.u_mem_instr.mem[7].value = 0x00
+    await init_instr(dut, 0, 0x00209863) # bne x1, x2, 0x10
+    await init_instr(dut, 4, 0x00419863) # bne x3, x4, 0x10
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -319,18 +265,8 @@ async def test_bne(dut):
 async def test_blt(dut):
     """Check BLT."""
     await init_dut(dut)
-
-    # blt x1, x2, 0x10
-    dut.u_mem_instr.mem[0].value = 0x63
-    dut.u_mem_instr.mem[1].value = 0xc8
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    # blt x3, x4, 0x10
-    dut.u_mem_instr.mem[4].value = 0x63
-    dut.u_mem_instr.mem[5].value = 0xc8
-    dut.u_mem_instr.mem[6].value = 0x41
-    dut.u_mem_instr.mem[7].value = 0x00
+    await init_instr(dut, 0, 0x0020c863) # blt x1, x2, 0x10
+    await init_instr(dut, 4, 0x0041c863) # blt x3, x4, 0x10
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -365,18 +301,8 @@ async def test_blt(dut):
 async def test_bge(dut):
     """Check BGE."""
     await init_dut(dut)
-
-    # bge x1, x2, 0x10
-    dut.u_mem_instr.mem[0].value = 0x63
-    dut.u_mem_instr.mem[1].value = 0xd8
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    # bge x3, x4, 0x10
-    dut.u_mem_instr.mem[4].value = 0x63
-    dut.u_mem_instr.mem[5].value = 0xd8
-    dut.u_mem_instr.mem[6].value = 0x41
-    dut.u_mem_instr.mem[7].value = 0x00
+    await init_instr(dut, 0, 0x0020d863) # bge x1, x2, 0x10
+    await init_instr(dut, 4, 0x0041d863) # bge x3, x4, 0x10
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -411,18 +337,8 @@ async def test_bge(dut):
 async def test_bltu(dut):
     """Check BLTU."""
     await init_dut(dut)
-
-    # bltu x1, x2, 0x10
-    dut.u_mem_instr.mem[0].value = 0x63
-    dut.u_mem_instr.mem[1].value = 0xe8
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    # bltu x3, x4, 0x10
-    dut.u_mem_instr.mem[4].value = 0x63
-    dut.u_mem_instr.mem[5].value = 0xe8
-    dut.u_mem_instr.mem[6].value = 0x41
-    dut.u_mem_instr.mem[7].value = 0x00
+    await init_instr(dut, 0, 0x0020e863) # bltu x1, x2, 0x10
+    await init_instr(dut, 4, 0x0041e863) # bltu x3, x4, 0x10
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -457,18 +373,8 @@ async def test_bltu(dut):
 async def test_bgeu(dut):
     """Check BGEU."""
     await init_dut(dut)
-
-    # bgeu x1, x2, 0x10
-    dut.u_mem_instr.mem[0].value = 0x63
-    dut.u_mem_instr.mem[1].value = 0xf8
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    # bgeu x3, x4, 0x10
-    dut.u_mem_instr.mem[4].value = 0x63
-    dut.u_mem_instr.mem[5].value = 0xf8
-    dut.u_mem_instr.mem[6].value = 0x41
-    dut.u_mem_instr.mem[7].value = 0x00
+    await init_instr(dut, 0, 0x0020f863) # bgeu x1, x2, 0x10
+    await init_instr(dut, 4, 0x0041f863) # bgeu x3, x4, 0x10
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -501,19 +407,14 @@ async def test_bgeu(dut):
 
 @cocotb.test()
 async def test_lb(dut):
-    """Check LW."""
+    """Check LB."""
     await utils.init_dut(dut)
+    await init_instr(dut, 0, 0x00710083) # lb x1, x2, 0x7
 
-    # lb x1, x2, 0x7
-    dut.u_mem_instr.mem[0].value = 0x83
-    dut.u_mem_instr.mem[1].value = 0x00
-    dut.u_mem_instr.mem[2].value = 0x71
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    dut.u_mem_control.u_mem_data.mem_01[0].value = 0xbeef
-    dut.u_mem_control.u_mem_data.mem_23[0].value = 0xdead
-    dut.u_mem_control.u_mem_data.mem_01[1].value = 0xef01
-    dut.u_mem_control.u_mem_data.mem_23[1].value = 0xabcd
+    dut.u_mem_control.u_mem.mem_01[0].value = 0xbeef
+    dut.u_mem_control.u_mem.mem_23[0].value = 0xdead
+    dut.u_mem_control.u_mem.mem_01[1].value = 0xef01
+    dut.u_mem_control.u_mem.mem_23[1].value = 0xabcd
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -539,17 +440,12 @@ async def test_lb(dut):
 async def test_lh(dut):
     """Check LH."""
     await utils.init_dut(dut)
+    await init_instr(dut, 0, 0x00611083) # lh x1, x2, 0x6
 
-    # lh x1, x2, 0x6
-    dut.u_mem_instr.mem[0].value = 0x83
-    dut.u_mem_instr.mem[1].value = 0x10
-    dut.u_mem_instr.mem[2].value = 0x61
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    dut.u_mem_control.u_mem_data.mem_01[0].value = 0xbeef
-    dut.u_mem_control.u_mem_data.mem_23[0].value = 0xdead
-    dut.u_mem_control.u_mem_data.mem_01[1].value = 0xef01
-    dut.u_mem_control.u_mem_data.mem_23[1].value = 0xabcd
+    dut.u_mem_control.u_mem.mem_01[0].value = 0xbeef
+    dut.u_mem_control.u_mem.mem_23[0].value = 0xdead
+    dut.u_mem_control.u_mem.mem_01[1].value = 0xef01
+    dut.u_mem_control.u_mem.mem_23[1].value = 0xabcd
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -575,17 +471,12 @@ async def test_lh(dut):
 async def test_lw(dut):
     """Check LW."""
     await utils.init_dut(dut)
+    await init_instr(dut, 0, 0x00412083) # lw x1, x2, 0x4
 
-    # lw x1, x2, 0x4
-    dut.u_mem_instr.mem[0].value = 0x83
-    dut.u_mem_instr.mem[1].value = 0x20
-    dut.u_mem_instr.mem[2].value = 0x41
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    dut.u_mem_control.u_mem_data.mem_01[0].value = 0xbeef
-    dut.u_mem_control.u_mem_data.mem_23[0].value = 0xdead
-    dut.u_mem_control.u_mem_data.mem_01[1].value = 0xef01
-    dut.u_mem_control.u_mem_data.mem_23[1].value = 0xabcd
+    dut.u_mem_control.u_mem.mem_01[0].value = 0xbeef
+    dut.u_mem_control.u_mem.mem_23[0].value = 0xdead
+    dut.u_mem_control.u_mem.mem_01[1].value = 0xef01
+    dut.u_mem_control.u_mem.mem_23[1].value = 0xabcd
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -609,19 +500,14 @@ async def test_lw(dut):
 
 @cocotb.test()
 async def test_lbu(dut):
-    """Check LW."""
+    """Check LBU."""
     await utils.init_dut(dut)
+    await init_instr(dut, 0, 0x00714083) # lbu x1, x2, 0x7
 
-    # lb x1, x2, 0x7
-    dut.u_mem_instr.mem[0].value = 0x83
-    dut.u_mem_instr.mem[1].value = 0x40
-    dut.u_mem_instr.mem[2].value = 0x71
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    dut.u_mem_control.u_mem_data.mem_01[0].value = 0xbeef
-    dut.u_mem_control.u_mem_data.mem_23[0].value = 0xdead
-    dut.u_mem_control.u_mem_data.mem_01[1].value = 0xef01
-    dut.u_mem_control.u_mem_data.mem_23[1].value = 0xabcd
+    dut.u_mem_control.u_mem.mem_01[0].value = 0xbeef
+    dut.u_mem_control.u_mem.mem_23[0].value = 0xdead
+    dut.u_mem_control.u_mem.mem_01[1].value = 0xef01
+    dut.u_mem_control.u_mem.mem_23[1].value = 0xabcd
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -645,19 +531,14 @@ async def test_lbu(dut):
 
 @cocotb.test()
 async def test_lhu(dut):
-    """Check LW."""
+    """Check LHU."""
     await utils.init_dut(dut)
+    await init_instr(dut, 0, 0x00615083) # lhu x1, x2, 0x6
 
-    # lh x1, x2, 0x6
-    dut.u_mem_instr.mem[0].value = 0x83
-    dut.u_mem_instr.mem[1].value = 0x50
-    dut.u_mem_instr.mem[2].value = 0x61
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    dut.u_mem_control.u_mem_data.mem_01[0].value = 0xbeef
-    dut.u_mem_control.u_mem_data.mem_23[0].value = 0xdead
-    dut.u_mem_control.u_mem_data.mem_01[1].value = 0xef01
-    dut.u_mem_control.u_mem_data.mem_23[1].value = 0xabcd
+    dut.u_mem_control.u_mem.mem_01[0].value = 0xbeef
+    dut.u_mem_control.u_mem.mem_23[0].value = 0xdead
+    dut.u_mem_control.u_mem.mem_01[1].value = 0xef01
+    dut.u_mem_control.u_mem.mem_23[1].value = 0xabcd
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -683,12 +564,7 @@ async def test_lhu(dut):
 async def test_addi(dut):
     """Check ADDI."""
     await init_dut(dut)
-
-    # addi x1, x1, -2048
-    dut.u_mem_instr.mem[0].value = 0x93
-    dut.u_mem_instr.mem[1].value = 0x80
-    dut.u_mem_instr.mem[2].value = 0x00
-    dut.u_mem_instr.mem[3].value = 0x80
+    await init_instr(dut, 0, 0x80008093) # addi x1, x1, -2048
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -714,18 +590,8 @@ async def test_addi(dut):
 async def test_slti(dut):
     """Check SLTI."""
     await init_dut(dut)
-
-    # slti x1, x0, -2048
-    dut.u_mem_instr.mem[0].value = 0x93
-    dut.u_mem_instr.mem[1].value = 0x20
-    dut.u_mem_instr.mem[2].value = 0x00
-    dut.u_mem_instr.mem[3].value = 0x80
-
-    # slti x2, x0, 2047
-    dut.u_mem_instr.mem[4].value = 0x13
-    dut.u_mem_instr.mem[5].value = 0x21
-    dut.u_mem_instr.mem[6].value = 0xf0
-    dut.u_mem_instr.mem[7].value = 0x7f
+    await init_instr(dut, 0, 0x80002093) # slti x1, x0, -2048
+    await init_instr(dut, 4, 0x7ff02113) # slti x2, x0, 2047
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -758,18 +624,8 @@ async def test_slti(dut):
 async def test_sltiu(dut):
     """Check SLTIU."""
     await init_dut(dut)
-
-    # sltiu x1, x0, -2048
-    dut.u_mem_instr.mem[0].value = 0x93
-    dut.u_mem_instr.mem[1].value = 0x30
-    dut.u_mem_instr.mem[2].value = 0x00
-    dut.u_mem_instr.mem[3].value = 0x80
-
-    # sltiu x2, x0, 0
-    dut.u_mem_instr.mem[4].value = 0x13
-    dut.u_mem_instr.mem[5].value = 0x31
-    dut.u_mem_instr.mem[6].value = 0x00
-    dut.u_mem_instr.mem[7].value = 0x00
+    await init_instr(dut, 0, 0x80003093) # sltiu x1, x0, -2048
+    await init_instr(dut, 4, 0x00003113) # sltiu x2, x0, 0
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -802,12 +658,7 @@ async def test_sltiu(dut):
 async def test_xori(dut):
     """Check XORI."""
     await init_dut(dut)
-
-    # xori x1, x1, -(0x1000-0xabc)
-    dut.u_mem_instr.mem[0].value = 0x93
-    dut.u_mem_instr.mem[1].value = 0xc0
-    dut.u_mem_instr.mem[2].value = 0xc0
-    dut.u_mem_instr.mem[3].value = 0xab
+    await init_instr(dut, 0, 0xabc0c093) # xori x1, x1, -(0x1000-0xabc)
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -833,12 +684,7 @@ async def test_xori(dut):
 async def test_ori(dut):
     """Check ORI."""
     await init_dut(dut)
-
-    # ori x1, x1, -(0x1000-0xabc)
-    dut.u_mem_instr.mem[0].value = 0x93
-    dut.u_mem_instr.mem[1].value = 0xe0
-    dut.u_mem_instr.mem[2].value = 0xc0
-    dut.u_mem_instr.mem[3].value = 0xab
+    await init_instr(dut, 0, 0xabc0e093) # ori x1, x1, -(0x1000-0xabc)
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -864,12 +710,7 @@ async def test_ori(dut):
 async def test_andi(dut):
     """Check ANDI."""
     await init_dut(dut)
-
-    # andi x1, x1, -(0x1000-0xabc)
-    dut.u_mem_instr.mem[0].value = 0x93
-    dut.u_mem_instr.mem[1].value = 0xf0
-    dut.u_mem_instr.mem[2].value = 0xc0
-    dut.u_mem_instr.mem[3].value = 0xab
+    await init_instr(dut, 0, 0xabc0f093) # andi x1, x1, -(0x1000-0xabc)
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -895,12 +736,7 @@ async def test_andi(dut):
 async def test_slli(dut):
     """Check SLLI."""
     await init_dut(dut)
-
-    # slli x1, x1, 4
-    dut.u_mem_instr.mem[0].value = 0x93
-    dut.u_mem_instr.mem[1].value = 0x90
-    dut.u_mem_instr.mem[2].value = 0x40
-    dut.u_mem_instr.mem[3].value = 0x00
+    await init_instr(dut, 0, 0x00409093) # slli x1, x1, 4
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -926,12 +762,7 @@ async def test_slli(dut):
 async def test_srli(dut):
     """Check SRLI."""
     await init_dut(dut)
-
-    # srli x1, x1, 4
-    dut.u_mem_instr.mem[0].value = 0x93
-    dut.u_mem_instr.mem[1].value = 0xd0
-    dut.u_mem_instr.mem[2].value = 0x40
-    dut.u_mem_instr.mem[3].value = 0x00
+    await init_instr(dut, 0, 0x0040d093) # srli x1, x1, 4
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -957,12 +788,7 @@ async def test_srli(dut):
 async def test_srai(dut):
     """Check SRAI."""
     await init_dut(dut)
-
-    # srai x1, x1, 4
-    dut.u_mem_instr.mem[0].value = 0x93
-    dut.u_mem_instr.mem[1].value = 0xd0
-    dut.u_mem_instr.mem[2].value = 0x40
-    dut.u_mem_instr.mem[3].value = 0x40
+    await init_instr(dut, 0, 0x4040d093) # srai x1, x1, 4
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -988,12 +814,7 @@ async def test_srai(dut):
 async def test_add(dut):
     """Check ADD."""
     await init_dut(dut)
-
-    # add x1, x1, x2
-    dut.u_mem_instr.mem[0].value = 0xb3
-    dut.u_mem_instr.mem[1].value = 0x80
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
+    await init_instr(dut, 0, 0x002080b3) # add x1, x1, x2
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -1020,12 +841,7 @@ async def test_add(dut):
 async def test_sub(dut):
     """Check SUB."""
     await init_dut(dut)
-
-    # sub x1, x1, x2
-    dut.u_mem_instr.mem[0].value = 0xb3
-    dut.u_mem_instr.mem[1].value = 0x80
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x40
+    await init_instr(dut, 0, 0x402080b3) # sub x1, x1, x2
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -1052,12 +868,7 @@ async def test_sub(dut):
 async def test_sll(dut):
     """Check SLL."""
     await init_dut(dut)
-
-    # sll x1, x1, x2
-    dut.u_mem_instr.mem[0].value = 0xb3
-    dut.u_mem_instr.mem[1].value = 0x90
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
+    await init_instr(dut, 0, 0x002090b3) # sll x1, x1, x2
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -1084,18 +895,8 @@ async def test_sll(dut):
 async def test_slt(dut):
     """Check SLT."""
     await init_dut(dut)
-
-    # slt x1, x0, x1
-    dut.u_mem_instr.mem[0].value = 0xb3
-    dut.u_mem_instr.mem[1].value = 0x20
-    dut.u_mem_instr.mem[2].value = 0x10
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    # slt x2, x0, x2
-    dut.u_mem_instr.mem[4].value = 0x33
-    dut.u_mem_instr.mem[5].value = 0x21
-    dut.u_mem_instr.mem[6].value = 0x20
-    dut.u_mem_instr.mem[7].value = 0x00
+    await init_instr(dut, 0, 0x001020b3) # slt x1, x0, x1
+    await init_instr(dut, 4, 0x00202133) # slt x2, x0, x2
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -1128,18 +929,8 @@ async def test_slt(dut):
 async def test_sltu(dut):
     """Check SLTU."""
     await init_dut(dut)
-
-    # sltu x1, x0, x1
-    dut.u_mem_instr.mem[0].value = 0xb3
-    dut.u_mem_instr.mem[1].value = 0x30
-    dut.u_mem_instr.mem[2].value = 0x10
-    dut.u_mem_instr.mem[3].value = 0x00
-
-    # sltu x2, x0, x2
-    dut.u_mem_instr.mem[4].value = 0x33
-    dut.u_mem_instr.mem[5].value = 0x31
-    dut.u_mem_instr.mem[6].value = 0x20
-    dut.u_mem_instr.mem[7].value = 0x00
+    await init_instr(dut, 0, 0x001030b3) # sltu x1, x0, x1
+    await init_instr(dut, 4, 0x00203133) # sltu x2, x0, x2
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -1172,12 +963,7 @@ async def test_sltu(dut):
 async def test_xor(dut):
     """Check XOR."""
     await init_dut(dut)
-
-    # xor x1, x1, x2
-    dut.u_mem_instr.mem[0].value = 0xb3
-    dut.u_mem_instr.mem[1].value = 0xc0
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
+    await init_instr(dut, 0, 0x0020c0b3) # xor x1, x1, x2
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -1205,12 +991,7 @@ async def test_xor(dut):
 async def test_srl(dut):
     """Check SRL."""
     await init_dut(dut)
-
-    # srl x1, x1, x2
-    dut.u_mem_instr.mem[0].value = 0xb3
-    dut.u_mem_instr.mem[1].value = 0xd0
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
+    await init_instr(dut, 0, 0x0020d0b3) # srl x1, x1, x2
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -1237,12 +1018,7 @@ async def test_srl(dut):
 async def test_sra(dut):
     """Check SRA."""
     await init_dut(dut)
-
-    # srai x1, x1, x2
-    dut.u_mem_instr.mem[0].value = 0xb3
-    dut.u_mem_instr.mem[1].value = 0xd0
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x40
+    await init_instr(dut, 0, 0x4020d0b3) # srai x1, x1, x2
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -1269,12 +1045,7 @@ async def test_sra(dut):
 async def test_or(dut):
     """Check OR."""
     await init_dut(dut)
-
-    # or x1, x1, x2
-    dut.u_mem_instr.mem[0].value = 0xb3
-    dut.u_mem_instr.mem[1].value = 0xe0
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
+    await init_instr(dut, 0, 0x0020e0b3) # or x1, x1, x2
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
@@ -1301,12 +1072,7 @@ async def test_or(dut):
 async def test_and(dut):
     """Check AND."""
     await init_dut(dut)
-
-    # and x1, x1, x2
-    dut.u_mem_instr.mem[0].value = 0xb3
-    dut.u_mem_instr.mem[1].value = 0xf0
-    dut.u_mem_instr.mem[2].value = 0x20
-    dut.u_mem_instr.mem[3].value = 0x00
+    await init_instr(dut, 0, 0x0020f0b3) # and x1, x1, x2
 
     await ClockCycles(dut.clk_i, 2, rising=False)
     assert dut.pc.value == 0x10000
