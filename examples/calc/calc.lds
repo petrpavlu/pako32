@@ -12,8 +12,10 @@ SECTIONS
 	}
 	. = 0x20000;
 	.data : {
+		*(.data._stack)
 		*(*rodata.*)
 		*(.data)
+		*(.sdata)
 		*(.bss)
 	}
 }
