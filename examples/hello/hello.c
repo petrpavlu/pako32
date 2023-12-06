@@ -8,8 +8,8 @@
 #else
 
 typedef struct {
-	volatile unsigned char to_usb_byte;
-	volatile unsigned char to_usb_valid;
+	volatile unsigned char pad0;
+	volatile unsigned char to_usb; /* ready status on read, byte on write */
 	volatile unsigned char from_usb_ready;
 	volatile unsigned char from_usb_byte;
 } usb_fifo_t;
@@ -19,11 +19,10 @@ static usb_fifo_t *usb_fifo = (void *)0x30000;
 /* Output one character. */
 static void putchar(char c)
 {
-	while (usb_fifo->to_usb_valid)
+	while (!usb_fifo->to_usb)
 		;
 
-	usb_fifo->to_usb_byte = c;
-	usb_fifo->to_usb_valid = 1;
+	usb_fifo->to_usb = c;
 }
 
 #endif /* HOSTED */
@@ -33,11 +32,22 @@ __attribute((noreturn))
 int main(void)
 {
 	while (1) {
-		for (int i = 0; i < 3; i++) {
-			putchar('A' + i);
-			for (int j = 0; j < 2048; j++)
-				__asm__ ("");
-		}
+		putchar('H');
+		putchar('e');
+		putchar('l');
+		putchar('l');
+		putchar('o');
+		putchar(' ');
+		putchar('w');
+		putchar('o');
+		putchar('r');
+		putchar('l');
+		putchar('d');
+		putchar('!');
+		putchar('\r');
+		putchar('\n');
+		for (int j = 0; j < 1 << 14; j++)
+			__asm__ ("");
 	}
 }
 
