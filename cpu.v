@@ -141,7 +141,7 @@ module cpu
     .mem_acc_w_o(mem_acc_w)
   );
 
-  assign bus_data = mem_data_r | fifo_rddata;
+  assign bus_data = fifo_sel ? fifo_rddata : mem_data_r;
   assign rd_data_mx = rd_sel == `RD_SEL_ALU ? alu_res : bus_data;
   assign alu_a_mx = alu_a_sel == `ALU_A_SEL_RS1 ? rs1_data : pc;
   assign alu_b_mx = alu_b_sel == `ALU_B_SEL_RS2 ? rs2_data : imm_data;
