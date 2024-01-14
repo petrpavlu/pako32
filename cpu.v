@@ -61,7 +61,13 @@ module cpu
     .r_en_i('b1),
     .acc_r_i(2'(`MEM_ACCESS_WORD)),
     .addr_r_i(pc_next),
-    .data_r_o(pc_data)
+    .data_r_o(pc_data),
+
+    .wr_en_i('b0),
+    .acc_w_i(2'b0),
+    .addr_w_i(32'b0),
+    .data_w_i(32'b0),
+    .wr_ready_o()
   );
 
   registers u_registers (
