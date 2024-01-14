@@ -40,6 +40,10 @@ module mem_control
   logic        r_en;
   logic [31:0] addr_r;
   logic [31:0] data_r;
+  logic [1:0]  addr_r_post;
+  logic [1:0]  acc_r_post;
+  logic        sext_post;
+
   logic        wr_en;
   logic [31:0] addr_w;
   logic [31:0] data_w;
@@ -90,22 +94,29 @@ module mem_control
       // reading
       addr_r = (addr_r_i & 'hfffffffc) - MAP_ZERO;
 
-      case (acc_r_i)
+      // post posedge clk_i
+      case (acc_r_post)
         `MEM_ACCESS_BYTE: begin
-          if (sext_i == 1)
-            data_r_o =   signed'(8'(data_r >> (8 * (addr_r_i & 3))));
+          if (sext_post == 1)
+            data_r_o =   signed'(8'(data_r >> (8 * (addr_r_post & 3))));
           else
-            data_r_o = unsigned'(8'(data_r >> (8 * (addr_r_i & 3))));
+            data_r_o = unsigned'(8'(data_r >> (8 * (addr_r_post & 3))));
         end
         `MEM_ACCESS_HALFWORD: begin
-          if (sext_i == 1)
-             data_r_o =   signed'(16'(data_r >> (8 * (addr_r_i & 2))));
+          if (sext_post == 1)
+             data_r_o =   signed'(16'(data_r >> (8 * (addr_r_post & 2))));
            else
-             data_r_o = unsigned'(16'(data_r >> (8 * (addr_r_i & 2))));
+             data_r_o = unsigned'(16'(data_r >> (8 * (addr_r_post & 2))));
         end
         default:              data_r_o = data_r; // MEM_ACCESS_WORD
       endcase
     end
+  end
+
+  always_ff @(posedge clk_i) begin
+    addr_r_post <= addr_r_i;
+    acc_r_post <= acc_r_i;
+    sext_post <= sext_i;
   end
 
   always_ff @(posedge clk_i or negedge rstn_i) begin
