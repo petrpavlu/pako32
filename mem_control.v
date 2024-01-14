@@ -35,6 +35,8 @@ module mem_control
                    ST_WRITE_PENDING = 'd2;
 
   logic [1:0]  state;
+  logic [1:0]  state_next;
+
   logic        r_en;
   logic [31:0] addr_r;
   logic [31:0] data_r;
@@ -51,6 +53,7 @@ module mem_control
     wr_en = 0;
     addr_w = 0;
     data_w = 0;
+    state_next = ST_READY;
 
     wr_ready_o = state == ST_READY;
 
@@ -58,6 +61,7 @@ module mem_control
       // writing -- read of the original data
       r_en = 1; // XXX back to 0?
       addr_r = (addr_w_i & 'hfffffffc) - MAP_ZERO;
+      state_next = ST_WRITE_PENDING;
     end
     else if (state == ST_WRITE_PENDING) begin
       // writing -- store of the updated data
@@ -107,12 +111,8 @@ module mem_control
   always_ff @(posedge clk_i or negedge rstn_i) begin
     if (~rstn_i)
       state <= ST_RESET;
-    else if (state == ST_RESET)
-      state <= ST_READY;
-    else if (state == ST_READY && wr_en_i)
-      state <= ST_WRITE_PENDING;
-    else // ST_WRITE_PENDING or an invalid state
-      state <= ST_READY;
+    else
+      state <= state_next;
   end
 
   mem #(
