@@ -47,7 +47,7 @@ module mem_control
   // TODO Check correct alignment.
 
   always_comb begin
-    r_en = r_en_i;
+    r_en = r_en_i && (addr_r_i >= MAP_ZERO && addr_r_i < MAP_ZERO + 4 * ROWS);
     addr_r = 0;
     data_r_o = 0;
     wr_en = 0;
@@ -57,9 +57,9 @@ module mem_control
 
     wr_ready_o = state == ST_READY;
 
-    if (state == ST_READY && wr_en_i) begin
+    if (state == ST_READY && wr_en_i && (addr_w_i >= MAP_ZERO && addr_w_i < MAP_ZERO + 4 * ROWS)) begin
       // writing -- read of the original data
-      r_en = 1; // XXX back to 0?
+      r_en = 1;
       addr_r = (addr_w_i & 'hfffffffc) - MAP_ZERO;
       state_next = ST_WRITE_PENDING;
     end
