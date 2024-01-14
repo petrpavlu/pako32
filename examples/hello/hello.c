@@ -31,22 +31,13 @@ static void putchar(char c)
 __attribute((noreturn))
 int main(void)
 {
+	const char string[] = "Hello world!\r\n";
+
 	while (1) {
-		putchar('H');
-		putchar('e');
-		putchar('l');
-		putchar('l');
-		putchar('o');
-		putchar(' ');
-		putchar('w');
-		putchar('o');
-		putchar('r');
-		putchar('l');
-		putchar('d');
-		putchar('!');
-		putchar('\r');
-		putchar('\n');
-		for (int j = 0; j < 1 << 14; j++)
+		for (int i = 0; i < sizeof(string) - 1; i++)
+			putchar(string[i]);
+
+		for (int i = 0; i < 1 << 14; i++)
 			__asm__ ("");
 	}
 }
