@@ -93,24 +93,24 @@ module mem_control
     else if (r_en_i) begin
       // reading
       addr_r = (addr_r_i & 'hfffffffc) - MAP_ZERO;
-
-      // post posedge clk_i
-      case (acc_r_post)
-        `MEM_ACCESS_BYTE: begin
-          if (sext_post == 1)
-            data_r_o =   signed'(8'(data_r >> (8 * (addr_r_post & 3))));
-          else
-            data_r_o = unsigned'(8'(data_r >> (8 * (addr_r_post & 3))));
-        end
-        `MEM_ACCESS_HALFWORD: begin
-          if (sext_post == 1)
-             data_r_o =   signed'(16'(data_r >> (8 * (addr_r_post & 2))));
-           else
-             data_r_o = unsigned'(16'(data_r >> (8 * (addr_r_post & 2))));
-        end
-        default:              data_r_o = data_r; // MEM_ACCESS_WORD
-      endcase
     end
+
+    // post posedge clk_i
+    case (acc_r_post)
+      `MEM_ACCESS_BYTE: begin
+        if (sext_post == 1)
+          data_r_o =   signed'(8'(data_r >> (8 * (addr_r_post & 3))));
+        else
+          data_r_o = unsigned'(8'(data_r >> (8 * (addr_r_post & 3))));
+      end
+      `MEM_ACCESS_HALFWORD: begin
+        if (sext_post == 1)
+           data_r_o =   signed'(16'(data_r >> (8 * (addr_r_post & 2))));
+         else
+           data_r_o = unsigned'(16'(data_r >> (8 * (addr_r_post & 2))));
+      end
+      default:              data_r_o = data_r; // MEM_ACCESS_WORD
+    endcase
   end
 
   always_ff @(posedge clk_i) begin
