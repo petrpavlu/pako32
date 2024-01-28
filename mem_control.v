@@ -59,6 +59,7 @@ module mem_control
     data_w = 0;
     state_next = ST_READY;
 
+    // TODO Unnecessarily one cycle late?
     wr_ready_o = state == ST_READY;
 
     if (state == ST_READY && wr_en_i && (addr_w_i >= MAP_ZERO && addr_w_i < MAP_ZERO + 4 * ROWS)) begin

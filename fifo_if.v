@@ -94,6 +94,7 @@ module fifo_if
          if (read_i == 1'b1 && sel_i == 1'b1)
            addr_q <= addr_i;
          out_irq_q <= 1'b0;
+         // TODO Stall one cycle?
          if ((read_i == 1'b1 && sel_i == 1'b1 && addr_i == 2'b11) || ~started_q)
            out_ready_q <= 1'b1;
          if (out_valid_i == 1'b1 && out_ready_q == 1'b1) begin
