@@ -10,8 +10,8 @@
 typedef unsigned int size_t;
 
 typedef struct {
-	volatile unsigned char to_usb_byte;
-	volatile unsigned char to_usb_valid;
+	volatile unsigned char pad0;
+	volatile unsigned char to_usb; /* ready status on read, byte on write */
 	volatile unsigned char from_usb_ready;
 	volatile unsigned char from_usb_byte;
 } usb_fifo_t;
@@ -21,11 +21,10 @@ static usb_fifo_t *usb_fifo = (void *)0x30000;
 /* Output one character. */
 static void putchar(char c)
 {
-	while (usb_fifo->to_usb_valid)
+	while (!usb_fifo->to_usb)
 		;
 
-	usb_fifo->to_usb_byte = c;
-	usb_fifo->to_usb_valid = 1;
+	usb_fifo->to_usb = c;
 }
 
 /* Output a string. */
@@ -54,14 +53,17 @@ static int read_input(char *input, size_t size)
 
 	while (1) {
 		c = getchar();
-		if (c == '\n')
+		putchar(c);
+		if (c == '\r') {
+			putchar('\n');
 			break;
+		}
 		if (i + 1 < size)
 			input[i++] = c;
 	}
 
 	if (i + 1 >= size) {
-		printf("Input too long.\n");
+		printf("Input too long.\r\n");
 		return 1;
 	}
 
@@ -159,7 +161,7 @@ static int calculate(const char *input, int *result)
 		switch (token) {
 			case TOKEN_NUMBER:
 				if (expect_operator) {
-					printf("Invalid input.\n");
+					printf("Invalid input.\r\n");
 					return 0;
 				}
 				/* TODO Check for overflow. */
@@ -175,7 +177,7 @@ static int calculate(const char *input, int *result)
 			case TOKEN_EOI:
 				return 0;
 			case TOKEN_ERROR:
-				printf("Invalid input.\n");
+				printf("Invalid input.\r\n");
 				return 1;
 		}
 	}
@@ -203,7 +205,7 @@ static void print_int(int value)
 	print_xdigit((value >> 8) & 0xf);
 	print_xdigit((value >> 4) & 0xf);
 	print_xdigit((value >> 0) & 0xf);
-	putchar('\n');
+	printf("\r\n");
 }
 
 /* Read one input line, calculate the expression and print the result. */
