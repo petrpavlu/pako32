@@ -171,7 +171,7 @@ module cpu
   logic       fifo_out_irq, fifo_in_irq; // unused
 
   always_comb begin
-    fifo_sel = (mem_r_en || mem_wr_en) && alu_res >= `MEM_USB_IO_ZERO &&
+    fifo_sel = alu_res >= `MEM_USB_IO_ZERO &&
       alu_res < `MEM_USB_IO_ZERO + 4;
     fifo_rd = fifo_sel && mem_r_en;
     fifo_wr = fifo_sel && mem_wr_en;
