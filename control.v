@@ -134,23 +134,25 @@ module control
             end
           endcase
         end
-        7'b0000011: begin // LW{B,H,W,BU,HU}
-          reg_wr_en_o = 1;
+        7'b0000011: begin // L{B,H,W,BU,HU}
+          // TODO Split the values for both cycles in a clearer way.
+          reg_wr_en_o = state == ST_READ_STALL;
           imm_data_o = signed'(pc_data_i[31:20]);
           alu_b_sel_o = `ALU_B_SEL_IMM;
           rd_sel_o = `RD_SEL_MEM;
           pc_next_sel_o = state == ST_READ_STALL ? `PC_NEXT_SEL_NEXT : `PC_NEXT_SEL_STALL;
           mem_r_sext_o = ~pc_data_i[14];
-          mem_r_en_o = 1;
+          mem_r_en_o = state == ST_EXEC;
           mem_acc_r_o = pc_data_i[13:12];
 
           state_next = state == ST_READ_STALL ? ST_EXEC : ST_READ_STALL;
         end
         7'b0100011: begin // S{B,H,W}
+          // TODO Split the values for both cycles in a clearer way.
           imm_data_o = signed'({pc_data_i[31:25], pc_data_i[11:7]});
           alu_b_sel_o = `ALU_B_SEL_IMM;
           pc_next_sel_o = (state == ST_WRITE_STALL && mem_wr_ready_i == 1)  ? `PC_NEXT_SEL_NEXT : `PC_NEXT_SEL_STALL;
-          mem_wr_en_o = 1;
+          mem_wr_en_o = state == ST_EXEC;
           mem_acc_w_o = pc_data_i[13:12];
 
           state_next = (state == ST_WRITE_STALL && mem_wr_ready_i == 1) ? ST_EXEC : ST_WRITE_STALL;
